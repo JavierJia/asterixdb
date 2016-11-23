@@ -214,9 +214,6 @@ public class IntroduceLSMComponentFilterRule implements IAlgebraicRewriteRule {
                     }
                 }
             }
-            if (descendantOp.getInputs().isEmpty()) {
-                break;
-            }
             queue.addAll(descendantOp.getInputs());
         }
     }
