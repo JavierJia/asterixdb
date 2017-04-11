@@ -19,6 +19,7 @@
 package org.apache.hyracks.storage.am.lsm.common.impls;
 
 import java.nio.ByteBuffer;
+import java.util.logging.Logger;
 
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
@@ -29,6 +30,7 @@ import org.apache.hyracks.storage.am.common.ophelpers.MultiComparator;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMComponentFilter;
 
 public class LSMComponentFilter implements ILSMComponentFilter {
+    private static final Logger LOGGER = Logger.getLogger(LSMComponentFilter.class.getName());
 
     private final IBinaryComparatorFactory[] filterCmpFactories;
     private final ITreeIndexTupleWriter tupleWriter;
@@ -124,15 +126,18 @@ public class LSMComponentFilter implements ILSMComponentFilter {
         if (maxTuple != null && this.minTuple != null) {
             int c = filterCmp.compare(maxTuple, this.minTuple);
             if (c < 0) {
+                LOGGER.info("Not satisfy");
                 return false;
             }
         }
         if (minTuple != null && this.maxTuple != null) {
             int c = filterCmp.compare(minTuple, this.maxTuple);
             if (c > 0) {
+                LOGGER.info("Not satisfy");
                 return false;
             }
         }
+        LOGGER.info("IS satisfy");
         return true;
     }
 

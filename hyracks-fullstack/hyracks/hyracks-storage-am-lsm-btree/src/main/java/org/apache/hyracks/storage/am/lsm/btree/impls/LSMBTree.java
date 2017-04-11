@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.api.exceptions.ErrorCode;
@@ -82,6 +83,8 @@ import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import org.apache.hyracks.storage.common.file.IFileMapProvider;
 
 public class LSMBTree extends AbstractLSMIndex implements ITreeIndex {
+
+    private static final Logger LOGGER = Logger.getLogger(LSMBTree.class.getName());
 
     // For creating BTree's used in flush and merge.
     protected final LSMBTreeDiskComponentFactory componentFactory;
@@ -286,6 +289,7 @@ public class LSMBTree extends AbstractLSMIndex implements ITreeIndex {
                     addOperationalMutableComponents(operationalComponents);
                 }
                 if (filterManager != null) {
+                    LOGGER.info("Filter Manager is not null");
                     for (ILSMComponent c : immutableComponents) {
                         if (c.getLSMComponentFilter().satisfy(
                                 ((AbstractSearchPredicate) ctx.getSearchPredicate()).getMinFilterTuple(),

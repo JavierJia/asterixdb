@@ -24,7 +24,10 @@ import org.apache.hyracks.storage.am.bloomfilter.impls.BloomFilter;
 import org.apache.hyracks.storage.am.btree.api.IBTreeLeafFrame;
 import org.apache.hyracks.storage.am.btree.impls.BTreeRangeSearchCursor;
 
+import java.util.logging.Logger;
+
 public class BloomFilterAwareBTreePointSearchCursor extends BTreeRangeSearchCursor {
+    static Logger LOGGER = Logger.getLogger(BloomFilterAwareBTreePointSearchCursor.class.getName());
     private BloomFilter bloomFilter;
     private long[] hashes = new long[2];
 
@@ -36,8 +39,12 @@ public class BloomFilterAwareBTreePointSearchCursor extends BTreeRangeSearchCurs
 
     @Override
     public boolean hasNext() throws HyracksDataException {
+        LOGGER.warning("BloomFilter test");
         if (bloomFilter.contains(lowKey, hashes)) {
-            return super.hasNext();
+            LOGGER.warning("BloomFilter said contains");
+            boolean hasNext = super.hasNext();
+            LOGGER.warning("Btree search result:" + hasNext);
+            return hasNext;
         }
         return false;
     }
