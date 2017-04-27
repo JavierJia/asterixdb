@@ -71,18 +71,20 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
     protected final int[] maxFilterFieldIndexes;
     protected PermutingFrameTupleReference minFilterKey;
     protected PermutingFrameTupleReference maxFilterKey;
-    protected final boolean prependFilter;
+    protected final boolean appendIndexFilter;
+    protected final int numIndexFilterFields;
+    protected ArrayTupleBuilder nonFilterTupleBuild;
 
     public IndexSearchOperatorNodePushable(IIndexOperatorDescriptor opDesc, IHyracksTaskContext ctx, int partition,
-            IRecordDescriptorProvider recordDescProvider, boolean prependFilter, int[] minFilterFieldIndexes,
-            int[] maxFilterFieldIndexes) throws HyracksDataException {
+            IRecordDescriptorProvider recordDescProvider, boolean appendIndexFilter, int numIndexFilterFields,
+            int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes) throws HyracksDataException {
         this.opDesc = opDesc;
         this.ctx = ctx;
         this.indexHelper = opDesc.getIndexDataflowHelperFactory().createIndexDataflowHelper(opDesc, ctx, partition);
         this.retainInput = opDesc.getRetainInput();
         this.retainMissing = opDesc.getRetainMissing();
-        this.prependFilter = prependFilter;
-        if (this.retainMissing) {
+        this.appendIndexFilter = appendIndexFilter;
+        if (this.retainMissing || this.appendIndexFilter) {
             this.nonMatchWriter = opDesc.getMissingWriterFactory().createMissingWriter();
         }
         this.inputRecDesc = recordDescProvider.getInputRecordDescriptor(opDesc.getActivityId(), 0);
@@ -96,6 +98,7 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
             maxFilterKey = new PermutingFrameTupleReference();
             maxFilterKey.setFieldPermutation(maxFilterFieldIndexes);
         }
+        this.numIndexFilterFields = numIndexFilterFields;
     }
 
     protected abstract ISearchPredicate createSearchPredicate();
@@ -108,6 +111,18 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
 
     protected abstract int getFieldCount();
 
+    private static void buildMissingTuple(int numFields, ArrayTupleBuilder nullTuple, IMissingWriter nonMatchWriter) {
+        DataOutput out = nullTuple.getDataOutput();
+        for (int i = 0; i < numFields; i++) {
+            try {
+                nonMatchWriter.writeMissing(out);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            nullTuple.addFieldEndOffset();
+        }
+    }
+
     @Override
     public void open() throws HyracksDataException {
         writer.open();
@@ -117,17 +132,14 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         if (retainMissing) {
             int fieldCount = getFieldCount();
             nonMatchTupleBuild = new ArrayTupleBuilder(fieldCount);
-            DataOutput out = nonMatchTupleBuild.getDataOutput();
-            for (int i = 0; i < fieldCount; i++) {
-                try {
-                    nonMatchWriter.writeMissing(out);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                nonMatchTupleBuild.addFieldEndOffset();
-            }
+            buildMissingTuple(fieldCount, nonMatchTupleBuild, nonMatchWriter);
         } else {
             nonMatchTupleBuild = null;
+        }
+
+        if (appendIndexFilter) {
+            nonFilterTupleBuild = new ArrayTupleBuilder(numIndexFilterFields);
+            buildMissingTuple(numIndexFilterFields, nonFilterTupleBuild, nonMatchWriter);
         }
 
         try {
@@ -161,12 +173,11 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
                 }
             }
             ITupleReference tuple = cursor.getTuple();
-            if (prependFilter) {
+            writeTupleToOutput(tuple);
+            if (appendIndexFilter) {
                 writeTupleToOutput(cursor.getFilterMinTuple());
                 writeTupleToOutput(cursor.getFilterMaxTuple());
             }
-            writeTupleToOutput(tuple);
-
             FrameUtils.appendToWriter(writer, appender, tb.getFieldEndOffsets(), tb.getByteArray(), 0, tb.getSize());
         }
 

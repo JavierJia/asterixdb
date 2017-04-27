@@ -48,7 +48,8 @@ public class BTreeSearchOperatorDescriptor extends AbstractTreeIndexOperatorDesc
     protected final boolean highKeyInclusive;
     private final int[] minFilterFieldIndexes;
     private final int[] maxFilterFieldIndexes;
-    private boolean prependFilter;
+    private boolean appendFilter;
+    private int numIndexFilterFields;
 
     public BTreeSearchOperatorDescriptor(IOperatorDescriptorRegistry spec, RecordDescriptor recDesc,
             IStorageManager storageManager, IIndexLifecycleManagerProvider lifecycleManagerProvider,
@@ -57,7 +58,7 @@ public class BTreeSearchOperatorDescriptor extends AbstractTreeIndexOperatorDesc
             int[] highKeyFields, boolean lowKeyInclusive, boolean highKeyInclusive,
             IIndexDataflowHelperFactory dataflowHelperFactory, boolean retainInput, boolean retainMissing,
             IMissingWriterFactory missingWriterFactory, ISearchOperationCallbackFactory searchOpCallbackProvider,
-            boolean prependFilter, int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes,
+            boolean appendFilter, int numIndexFilterFields, int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes,
             IPageManagerFactory pageManagerFactory) {
         super(spec, 1, 1, recDesc, storageManager, lifecycleManagerProvider, fileSplitProvider, typeTraits,
                 comparatorFactories, bloomFilterKeyFields, dataflowHelperFactory, null, retainInput, retainMissing,
@@ -69,7 +70,8 @@ public class BTreeSearchOperatorDescriptor extends AbstractTreeIndexOperatorDesc
         this.highKeyInclusive = highKeyInclusive;
         this.minFilterFieldIndexes = minFilterFieldIndexes;
         this.maxFilterFieldIndexes = maxFilterFieldIndexes;
-        this.prependFilter = prependFilter;
+        this.appendFilter = appendFilter;
+        this.numIndexFilterFields = numIndexFilterFields;
     }
 
     public BTreeSearchOperatorDescriptor(IOperatorDescriptorRegistry spec, RecordDescriptor recDesc,
@@ -83,14 +85,14 @@ public class BTreeSearchOperatorDescriptor extends AbstractTreeIndexOperatorDesc
         this(spec, recDesc, storageManager, lifecycleManagerProvider, fileSplitProvider, typeTraits,
                 comparatorFactories, bloomFilterKeyFields, lowKeyFields, highKeyFields, lowKeyInclusive,
                 highKeyInclusive, dataflowHelperFactory, retainInput, retainMissing, missingWriterFactory,
-                searchOpCallbackProvider, false, minFilterFieldIndexes, maxFilterFieldIndexes, pageManagerFactory);
+                searchOpCallbackProvider, false, 0, minFilterFieldIndexes, maxFilterFieldIndexes, pageManagerFactory);
     }
 
     @Override
     public IOperatorNodePushable createPushRuntime(final IHyracksTaskContext ctx,
             IRecordDescriptorProvider recordDescProvider, int partition, int nPartitions) throws HyracksDataException {
         return new BTreeSearchOperatorNodePushable(this, ctx, partition, recordDescProvider, lowKeyFields,
-                highKeyFields, lowKeyInclusive, highKeyInclusive, prependFilter, minFilterFieldIndexes,
-                maxFilterFieldIndexes);
+                highKeyFields, lowKeyInclusive, highKeyInclusive, appendFilter, numIndexFilterFields,
+                minFilterFieldIndexes, maxFilterFieldIndexes);
     }
 }
