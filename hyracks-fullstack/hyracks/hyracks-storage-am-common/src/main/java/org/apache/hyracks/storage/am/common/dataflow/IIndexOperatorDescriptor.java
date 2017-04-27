@@ -46,8 +46,6 @@ public interface IIndexOperatorDescriptor extends IActivity {
 
     boolean getRetainMissing();
 
-    boolean getIfPrependFilter();
-
     IMissingWriterFactory getMissingWriterFactory();
 
     ISearchOperationCallbackFactory getSearchOpCallbackFactory();

@@ -41,9 +41,9 @@ public class BTreeSearchOperatorNodePushable extends IndexSearchOperatorNodePush
 
     public BTreeSearchOperatorNodePushable(AbstractTreeIndexOperatorDescriptor opDesc, IHyracksTaskContext ctx,
             int partition, IRecordDescriptorProvider recordDescProvider, int[] lowKeyFields, int[] highKeyFields,
-            boolean lowKeyInclusive, boolean highKeyInclusive, int[] minFilterFieldIndexes,
+            boolean lowKeyInclusive, boolean highKeyInclusive, boolean prependFilter, int[] minFilterFieldIndexes,
             int[] maxFilterFieldIndexes) throws HyracksDataException {
-        super(opDesc, ctx, partition, recordDescProvider, minFilterFieldIndexes, maxFilterFieldIndexes);
+        super(opDesc, ctx, partition, recordDescProvider, prependFilter, minFilterFieldIndexes, maxFilterFieldIndexes);
         this.lowKeyInclusive = lowKeyInclusive;
         this.highKeyInclusive = highKeyInclusive;
         if (lowKeyFields != null && lowKeyFields.length > 0) {

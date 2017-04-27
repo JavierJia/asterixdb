@@ -74,14 +74,14 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
     protected final boolean prependFilter;
 
     public IndexSearchOperatorNodePushable(IIndexOperatorDescriptor opDesc, IHyracksTaskContext ctx, int partition,
-            IRecordDescriptorProvider recordDescProvider, int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes)
-            throws HyracksDataException {
+            IRecordDescriptorProvider recordDescProvider, boolean prependFilter, int[] minFilterFieldIndexes,
+            int[] maxFilterFieldIndexes) throws HyracksDataException {
         this.opDesc = opDesc;
         this.ctx = ctx;
         this.indexHelper = opDesc.getIndexDataflowHelperFactory().createIndexDataflowHelper(opDesc, ctx, partition);
         this.retainInput = opDesc.getRetainInput();
         this.retainMissing = opDesc.getRetainMissing();
-        this.prependFilter = opDesc.getIfPrependFilter();
+        this.prependFilter = prependFilter;
         if (this.retainMissing) {
             this.nonMatchWriter = opDesc.getMissingWriterFactory().createMissingWriter();
         }

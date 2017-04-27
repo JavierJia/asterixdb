@@ -39,7 +39,7 @@ public class BTreeUpdateSearchOperatorNodePushable extends BTreeSearchOperatorNo
             int partition, IRecordDescriptorProvider recordDescProvider, int[] lowKeyFields, int[] highKeyFields,
             boolean lowKeyInclusive, boolean highKeyInclusive, ITupleUpdater tupleUpdater) throws HyracksDataException {
         super(opDesc, ctx, partition, recordDescProvider, lowKeyFields, highKeyFields, lowKeyInclusive,
-                highKeyInclusive, null, null);
+                highKeyInclusive,false, null, null);
         this.tupleUpdater = tupleUpdater;
     }
 

@@ -47,7 +47,32 @@ public class LSMInvertedIndexSearchOperatorDescriptor extends AbstractLSMInverte
     private final IInvertedIndexSearchModifierFactory searchModifierFactory;
     private final int[] minFilterFieldIndexes;
     private final int[] maxFilterFieldIndexes;
+    private final boolean prependFilter;
     private final boolean isFullTextSearchQuery;
+
+    public LSMInvertedIndexSearchOperatorDescriptor(IOperatorDescriptorRegistry spec, int queryField,
+            IStorageManager storageManager, IFileSplitProvider fileSplitProvider,
+            IIndexLifecycleManagerProvider lifecycleManagerProvider, ITypeTraits[] tokenTypeTraits,
+            IBinaryComparatorFactory[] tokenComparatorFactories, ITypeTraits[] invListsTypeTraits,
+            IBinaryComparatorFactory[] invListComparatorFactories,
+            IIndexDataflowHelperFactory btreeDataflowHelperFactory, IBinaryTokenizerFactory queryTokenizerFactory,
+            IInvertedIndexSearchModifierFactory searchModifierFactory, RecordDescriptor recDesc, boolean retainInput,
+            boolean retainNull, IMissingWriterFactory nullWriterFactory,
+            ISearchOperationCallbackFactory searchOpCallbackProvider, boolean prependFilter,
+            int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes, IPageManagerFactory pageManagerFactory,
+            boolean isFullTextSearchQuery) {
+        super(spec, 1, 1, recDesc, storageManager, fileSplitProvider, lifecycleManagerProvider, tokenTypeTraits,
+                tokenComparatorFactories, invListsTypeTraits, invListComparatorFactories, queryTokenizerFactory,
+                btreeDataflowHelperFactory, null, retainInput, retainNull, nullWriterFactory,
+                NoOpLocalResourceFactoryProvider.INSTANCE, searchOpCallbackProvider,
+                NoOpOperationCallbackFactory.INSTANCE, pageManagerFactory);
+        this.queryField = queryField;
+        this.searchModifierFactory = searchModifierFactory;
+        this.minFilterFieldIndexes = minFilterFieldIndexes;
+        this.maxFilterFieldIndexes = maxFilterFieldIndexes;
+        this.isFullTextSearchQuery = isFullTextSearchQuery;
+        this.prependFilter = prependFilter;
+    }
 
     public LSMInvertedIndexSearchOperatorDescriptor(IOperatorDescriptorRegistry spec, int queryField,
             IStorageManager storageManager, IFileSplitProvider fileSplitProvider,
@@ -59,16 +84,11 @@ public class LSMInvertedIndexSearchOperatorDescriptor extends AbstractLSMInverte
             boolean retainNull, IMissingWriterFactory nullWriterFactory,
             ISearchOperationCallbackFactory searchOpCallbackProvider, int[] minFilterFieldIndexes,
             int[] maxFilterFieldIndexes, IPageManagerFactory pageManagerFactory, boolean isFullTextSearchQuery) {
-        super(spec, 1, 1, recDesc, storageManager, fileSplitProvider, lifecycleManagerProvider, tokenTypeTraits,
-                tokenComparatorFactories, invListsTypeTraits, invListComparatorFactories, queryTokenizerFactory,
-                btreeDataflowHelperFactory, null, retainInput, retainNull, nullWriterFactory,
-                NoOpLocalResourceFactoryProvider.INSTANCE, searchOpCallbackProvider,
-                NoOpOperationCallbackFactory.INSTANCE, pageManagerFactory);
-        this.queryField = queryField;
-        this.searchModifierFactory = searchModifierFactory;
-        this.minFilterFieldIndexes = minFilterFieldIndexes;
-        this.maxFilterFieldIndexes = maxFilterFieldIndexes;
-        this.isFullTextSearchQuery = isFullTextSearchQuery;
+        this(spec, queryField, storageManager, fileSplitProvider, lifecycleManagerProvider, tokenTypeTraits,
+                tokenComparatorFactories, invListsTypeTraits, invListComparatorFactories, btreeDataflowHelperFactory,
+                queryTokenizerFactory, searchModifierFactory, recDesc, retainInput, retainNull, nullWriterFactory,
+                searchOpCallbackProvider, false, minFilterFieldIndexes, maxFilterFieldIndexes, pageManagerFactory,
+                isFullTextSearchQuery);
     }
 
     @Override
@@ -76,6 +96,6 @@ public class LSMInvertedIndexSearchOperatorDescriptor extends AbstractLSMInverte
             IRecordDescriptorProvider recordDescProvider, int partition, int nPartitions) throws HyracksDataException {
         IInvertedIndexSearchModifier searchModifier = searchModifierFactory.createSearchModifier();
         return new LSMInvertedIndexSearchOperatorNodePushable(this, ctx, partition, recordDescProvider, queryField,
-                searchModifier, minFilterFieldIndexes, maxFilterFieldIndexes, isFullTextSearchQuery);
+                searchModifier, prependFilter, minFilterFieldIndexes, maxFilterFieldIndexes, isFullTextSearchQuery);
     }
 }
