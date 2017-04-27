@@ -399,6 +399,7 @@ public class LSMBTree extends AbstractLSMIndex implements ITreeIndex {
         LSMBTreeOpContext ctx = (LSMBTreeOpContext) ictx;
         List<ILSMComponent> operationalComponents = ctx.getComponentHolder();
         ctx.searchInitialState.reset(pred, operationalComponents);
+        //TODO reset filter tuple
         cursor.open(ctx.searchInitialState, pred);
     }
 

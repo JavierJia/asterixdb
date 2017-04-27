@@ -355,6 +355,7 @@ public class AccessMethodUtils {
         sourceVars = ((AbstractUnnestMapOperator) unnestMapOp).getVariables();
 
         // Assumes the primary keys are located at the end.
+        // TODO look at here about the variables
         int start = sourceVars.size() - numPrimaryKeys;
         int stop = sourceVars.size();
         for (int i = start; i < stop; i++) {
@@ -537,6 +538,7 @@ public class AccessMethodUtils {
         // Optionally add a sort on the primary-index keys before searching the primary index.
         OrderOperator order = null;
         if (sortPrimaryKeys) {
+            //FIXME should sort on filter first
             order = new OrderOperator();
             for (LogicalVariable pkVar : primaryKeyVars) {
                 Mutable<ILogicalExpression> vRef = new MutableObject<>(

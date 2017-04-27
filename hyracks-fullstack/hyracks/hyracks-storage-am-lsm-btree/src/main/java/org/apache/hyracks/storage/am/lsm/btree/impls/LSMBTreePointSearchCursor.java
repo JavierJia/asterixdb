@@ -33,11 +33,8 @@ import org.apache.hyracks.storage.am.common.api.ISearchOperationCallback;
 import org.apache.hyracks.storage.am.common.api.ISearchPredicate;
 import org.apache.hyracks.storage.am.common.api.ITreeIndexCursor;
 import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallback;
-import org.apache.hyracks.storage.am.lsm.common.api.ILSMComponent;
+import org.apache.hyracks.storage.am.lsm.common.api.*;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMComponent.LSMComponentType;
-import org.apache.hyracks.storage.am.lsm.common.api.ILSMHarness;
-import org.apache.hyracks.storage.am.lsm.common.api.ILSMIndexOperationContext;
-import org.apache.hyracks.storage.am.lsm.common.api.ILSMTreeTupleReference;
 import org.apache.hyracks.storage.am.lsm.common.impls.BloomFilterAwareBTreePointSearchCursor;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import org.apache.hyracks.storage.common.buffercache.ICachedPage;
@@ -54,6 +51,7 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
     private ILSMHarness lsmHarness;
     private boolean nextHasBeenCalled;
     private boolean foundTuple;
+    private int foundIn = -1;
     private ITupleReference frameTuple;
     private List<ILSMComponent> operationalComponents;
 
@@ -83,6 +81,7 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
                     } else {
                         frameTuple = rangeCursors[i].getTuple();
                         foundTuple = true;
+                        foundIn = i;
                         return true;
                     }
                 }
@@ -104,6 +103,7 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
                         } else {
                             frameTuple = rangeCursors[i].getTuple();
                             foundTuple = true;
+                            foundIn = i;
                             return true;
                         }
                     } else {
@@ -114,6 +114,7 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
                     searchCallback.reconcile(frameTuple);
                     searchCallback.complete(frameTuple);
                     foundTuple = true;
+                    foundIn = i;
                     return true;
                 }
             } else {
@@ -223,6 +224,24 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
         return frameTuple;
     }
 
+    @Override
+    public ITupleReference getFilterMinTuple() {
+        ILSMComponentFilter filter = getFilter();
+        return filter == null ? null : filter.getMinTuple();
+    }
+
+    @Override
+    public ITupleReference getFilterMaxTuple() {
+        ILSMComponentFilter filter = getFilter();
+        return filter == null ? null : filter.getMaxTuple();
+    }
+
+    private ILSMComponentFilter getFilter() {
+        if(foundTuple){
+            return operationalComponents.get(foundIn).getLSMComponentFilter();
+        }
+        return null;
+    }
     @Override
     public ICachedPage getPage() {
         // do nothing

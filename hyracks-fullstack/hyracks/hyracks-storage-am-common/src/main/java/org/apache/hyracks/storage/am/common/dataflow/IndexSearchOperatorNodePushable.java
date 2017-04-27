@@ -71,6 +71,7 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
     protected final int[] maxFilterFieldIndexes;
     protected PermutingFrameTupleReference minFilterKey;
     protected PermutingFrameTupleReference maxFilterKey;
+    protected final boolean prependFilter;
 
     public IndexSearchOperatorNodePushable(IIndexOperatorDescriptor opDesc, IHyracksTaskContext ctx, int partition,
             IRecordDescriptorProvider recordDescProvider, int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes)
@@ -80,6 +81,7 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         this.indexHelper = opDesc.getIndexDataflowHelperFactory().createIndexDataflowHelper(opDesc, ctx, partition);
         this.retainInput = opDesc.getRetainInput();
         this.retainMissing = opDesc.getRetainMissing();
+        this.prependFilter = opDesc.getIfPrependFilter();
         if (this.retainMissing) {
             this.nonMatchWriter = opDesc.getMissingWriterFactory().createMissingWriter();
         }
@@ -159,10 +161,12 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
                 }
             }
             ITupleReference tuple = cursor.getTuple();
-            for (int i = 0; i < tuple.getFieldCount(); i++) {
-                dos.write(tuple.getFieldData(i), tuple.getFieldStart(i), tuple.getFieldLength(i));
-                tb.addFieldEndOffset();
+            if (prependFilter) {
+                writeTupleToOutput(cursor.getFilterMinTuple());
+                writeTupleToOutput(cursor.getFilterMaxTuple());
             }
+            writeTupleToOutput(tuple);
+
             FrameUtils.appendToWriter(writer, appender, tb.getFieldEndOffsets(), tb.getByteArray(), 0, tb.getSize());
         }
 
@@ -170,6 +174,15 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
             FrameUtils.appendConcatToWriter(writer, appender, accessor, tupleIndex,
                     nonMatchTupleBuild.getFieldEndOffsets(), nonMatchTupleBuild.getByteArray(), 0,
                     nonMatchTupleBuild.getSize());
+        }
+    }
+
+    private void writeTupleToOutput(ITupleReference tuple) throws IOException {
+        if (tuple != null) {
+            for (int i = 0; i < tuple.getFieldCount(); i++) {
+                dos.write(tuple.getFieldData(i), tuple.getFieldStart(i), tuple.getFieldLength(i));
+                tb.addFieldEndOffset();
+            }
         }
     }
 
