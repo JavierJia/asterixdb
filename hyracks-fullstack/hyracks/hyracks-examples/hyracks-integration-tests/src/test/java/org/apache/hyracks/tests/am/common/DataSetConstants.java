@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.hyracks.tests.am.common;
 
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
@@ -28,12 +47,16 @@ public class DataSetConstants {
 
     // field, type and key declarations for primary index
     public static int[] primaryFieldPermutation = { 0, 1, 2, 4, 5, 7 };
+    public static final int[] primaryFilterFields = new int[] { 0 };
+    public static final int[] primaryBtreeFields = new int[] { 0, 1, 2, 3, 4, 5 };
+    public static final ITypeTraits[] primaryFilterTypeTraits = new ITypeTraits[] { UTF8StringPointable.TYPE_TRAITS };
+    public static final IBinaryComparatorFactory[] primaryFilterCmpFactories =
+            new IBinaryComparatorFactory[] { PointableBinaryComparatorFactory.of(UTF8StringPointable.FACTORY) };
 
     public static final ITypeTraits[] primaryTypeTraits =
             new ITypeTraits[] { UTF8StringPointable.TYPE_TRAITS, UTF8StringPointable.TYPE_TRAITS,
                     UTF8StringPointable.TYPE_TRAITS, UTF8StringPointable.TYPE_TRAITS, UTF8StringPointable.TYPE_TRAITS,
                     UTF8StringPointable.TYPE_TRAITS };
-    public static final int primaryFieldCount = primaryTypeTraits.length;
 
     public static final IBinaryComparatorFactory[] primaryComparatorFactories =
             new IBinaryComparatorFactory[] { PointableBinaryComparatorFactory.of(UTF8StringPointable.FACTORY) };
@@ -49,17 +72,23 @@ public class DataSetConstants {
 
     // field, type and key declarations for secondary indexes
 
-    public static int[] secondaryFieldPermutationA = { 3, 0 };
-    public static int[] secondaryFieldPermutationB = { 4, 0 };
+
+    public static final int secondaryKeyFieldCount = 2;
+    public static final int[] secondaryFieldPermutationA = { 3, 0 };
+    public static final int[] secondaryFieldPermutationB = { 4, 0 };
+    public static final int[] secondaryFilterFields = new int[] { 1 };
+    public static final int[] secondaryBtreeFields = new int[] { 0, 1 };
+    public static final int[] secondaryBloomFilterKeyFields = new int[] { 0, 1 };
+    public static final ITypeTraits[] secondaryFilterTypeTraits = new ITypeTraits[] { UTF8StringPointable.TYPE_TRAITS };
+    public static final IBinaryComparatorFactory[] secondaryFilterCmpFactories =
+            new IBinaryComparatorFactory[] { PointableBinaryComparatorFactory.of(UTF8StringPointable.FACTORY) };
 
     public static final ITypeTraits[] secondaryTypeTraits =
             new ITypeTraits[] { UTF8StringPointable.TYPE_TRAITS, UTF8StringPointable.TYPE_TRAITS };
-    public static final int secondaryKeyFieldCount = secondaryTypeTraits.length;
 
     public static final IBinaryComparatorFactory[] secondaryComparatorFactories =
             new IBinaryComparatorFactory[] { PointableBinaryComparatorFactory.of(UTF8StringPointable.FACTORY),
                     PointableBinaryComparatorFactory.of(UTF8StringPointable.FACTORY) };
-    public static final int[] secondaryBloomFilterKeyFields = new int[] { 0, 1 };
 
     public static final RecordDescriptor secondaryRecDesc = new RecordDescriptor(
             new ISerializerDeserializer[] { new UTF8StringSerializerDeserializer(),

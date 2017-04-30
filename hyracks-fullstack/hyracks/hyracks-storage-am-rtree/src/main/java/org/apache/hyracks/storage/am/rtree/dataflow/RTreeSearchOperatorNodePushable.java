@@ -37,10 +37,8 @@ public class RTreeSearchOperatorNodePushable extends IndexSearchOperatorNodePush
 
     public RTreeSearchOperatorNodePushable(AbstractTreeIndexOperatorDescriptor opDesc, IHyracksTaskContext ctx,
             int partition, IRecordDescriptorProvider recordDescProvider, int[] keyFields, boolean appendFilter,
-            int numIndexFilterFields, int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes)
-            throws HyracksDataException {
-        super(opDesc, ctx, partition, recordDescProvider, appendFilter, numIndexFilterFields, minFilterFieldIndexes,
-                maxFilterFieldIndexes);
+            int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes) throws HyracksDataException {
+        super(opDesc, ctx, partition, recordDescProvider, appendFilter, minFilterFieldIndexes, maxFilterFieldIndexes);
         if (keyFields != null && keyFields.length > 0) {
             searchKey = new PermutingFrameTupleReference();
             searchKey.setFieldPermutation(keyFields);

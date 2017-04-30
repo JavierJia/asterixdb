@@ -49,7 +49,6 @@ public class BTreeSearchOperatorDescriptor extends AbstractTreeIndexOperatorDesc
     private final int[] minFilterFieldIndexes;
     private final int[] maxFilterFieldIndexes;
     private boolean appendFilter;
-    private int numIndexFilterFields;
 
     public BTreeSearchOperatorDescriptor(IOperatorDescriptorRegistry spec, RecordDescriptor recDesc,
             IStorageManager storageManager, IIndexLifecycleManagerProvider lifecycleManagerProvider,
@@ -58,7 +57,7 @@ public class BTreeSearchOperatorDescriptor extends AbstractTreeIndexOperatorDesc
             int[] highKeyFields, boolean lowKeyInclusive, boolean highKeyInclusive,
             IIndexDataflowHelperFactory dataflowHelperFactory, boolean retainInput, boolean retainMissing,
             IMissingWriterFactory missingWriterFactory, ISearchOperationCallbackFactory searchOpCallbackProvider,
-            boolean appendFilter, int numIndexFilterFields, int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes,
+            boolean appendFilter, int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes,
             IPageManagerFactory pageManagerFactory) {
         super(spec, 1, 1, recDesc, storageManager, lifecycleManagerProvider, fileSplitProvider, typeTraits,
                 comparatorFactories, bloomFilterKeyFields, dataflowHelperFactory, null, retainInput, retainMissing,
@@ -71,7 +70,6 @@ public class BTreeSearchOperatorDescriptor extends AbstractTreeIndexOperatorDesc
         this.minFilterFieldIndexes = minFilterFieldIndexes;
         this.maxFilterFieldIndexes = maxFilterFieldIndexes;
         this.appendFilter = appendFilter;
-        this.numIndexFilterFields = numIndexFilterFields;
     }
 
     public BTreeSearchOperatorDescriptor(IOperatorDescriptorRegistry spec, RecordDescriptor recDesc,
@@ -85,14 +83,14 @@ public class BTreeSearchOperatorDescriptor extends AbstractTreeIndexOperatorDesc
         this(spec, recDesc, storageManager, lifecycleManagerProvider, fileSplitProvider, typeTraits,
                 comparatorFactories, bloomFilterKeyFields, lowKeyFields, highKeyFields, lowKeyInclusive,
                 highKeyInclusive, dataflowHelperFactory, retainInput, retainMissing, missingWriterFactory,
-                searchOpCallbackProvider, false, 0, minFilterFieldIndexes, maxFilterFieldIndexes, pageManagerFactory);
+                searchOpCallbackProvider, false, minFilterFieldIndexes, maxFilterFieldIndexes, pageManagerFactory);
     }
 
     @Override
     public IOperatorNodePushable createPushRuntime(final IHyracksTaskContext ctx,
             IRecordDescriptorProvider recordDescProvider, int partition, int nPartitions) throws HyracksDataException {
         return new BTreeSearchOperatorNodePushable(this, ctx, partition, recordDescProvider, lowKeyFields,
-                highKeyFields, lowKeyInclusive, highKeyInclusive, appendFilter, numIndexFilterFields,
+                highKeyFields, lowKeyInclusive, highKeyInclusive, appendFilter,
                 minFilterFieldIndexes, maxFilterFieldIndexes);
     }
 }

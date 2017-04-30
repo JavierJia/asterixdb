@@ -19,9 +19,6 @@
 
 package org.apache.hyracks.tests.am.lsm.btree;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.hyracks.control.nc.io.IOManager;
 import org.apache.hyracks.storage.am.common.dataflow.IIndexDataflowHelperFactory;
 import org.apache.hyracks.storage.am.lsm.btree.dataflow.LSMBTreeDataflowHelperFactory;
@@ -31,9 +28,15 @@ import org.apache.hyracks.storage.am.lsm.common.impls.SynchronousSchedulerProvid
 import org.apache.hyracks.storage.am.lsm.common.impls.ThreadCountingOperationTrackerFactory;
 import org.apache.hyracks.tests.am.common.LSMTreeOperatorTestHelper;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.apache.hyracks.tests.am.common.DataSetConstants.*;
+
 public class LSMBTreeOperatorTestHelper extends LSMTreeOperatorTestHelper {
 
     private static final Map<String, String> MERGE_POLICY_PROPERTIES;
+
     static {
         MERGE_POLICY_PROPERTIES = new HashMap<String, String>();
         MERGE_POLICY_PROPERTIES.put("num-components", "3");
@@ -43,11 +46,20 @@ public class LSMBTreeOperatorTestHelper extends LSMTreeOperatorTestHelper {
         super(ioManager);
     }
 
-    public IIndexDataflowHelperFactory createDataFlowHelperFactory() {
+    public IIndexDataflowHelperFactory createPrimaryDataFlowHelperFactory() {
         return new LSMBTreeDataflowHelperFactory(virtualBufferCacheProvider, new ConstantMergePolicyFactory(),
                 MERGE_POLICY_PROPERTIES, ThreadCountingOperationTrackerFactory.INSTANCE,
                 SynchronousSchedulerProvider.INSTANCE, NoOpIOOperationCallback.INSTANCE,
-                DEFAULT_BLOOM_FILTER_FALSE_POSITIVE_RATE, true, null, null, null, null, true);
+                DEFAULT_BLOOM_FILTER_FALSE_POSITIVE_RATE, true, primaryFilterTypeTraits, primaryFilterCmpFactories,
+                primaryBtreeFields, primaryFilterFields, true);
+    }
+
+    public IIndexDataflowHelperFactory createSecondaryDataFlowHelperFactory() {
+        return new LSMBTreeDataflowHelperFactory(virtualBufferCacheProvider, new ConstantMergePolicyFactory(),
+                MERGE_POLICY_PROPERTIES, ThreadCountingOperationTrackerFactory.INSTANCE,
+                SynchronousSchedulerProvider.INSTANCE, NoOpIOOperationCallback.INSTANCE,
+                DEFAULT_BLOOM_FILTER_FALSE_POSITIVE_RATE, true, secondaryFilterTypeTraits, secondaryFilterCmpFactories,
+                secondaryBtreeFields, secondaryFilterFields, true);
     }
 
 }

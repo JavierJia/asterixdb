@@ -34,6 +34,6 @@ public class LSMBTreePrimaryIndexScanOperatorTest extends BTreePrimaryIndexScanO
 
     @Override
     protected IIndexDataflowHelperFactory createDataFlowHelperFactory() {
-        return ((LSMBTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
+        return ((LSMBTreeOperatorTestHelper) testHelper).createPrimaryDataFlowHelperFactory();
     }
 }

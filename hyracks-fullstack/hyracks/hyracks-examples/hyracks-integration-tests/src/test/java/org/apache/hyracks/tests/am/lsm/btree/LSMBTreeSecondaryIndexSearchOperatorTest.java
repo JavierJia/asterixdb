@@ -24,6 +24,7 @@ import org.apache.hyracks.storage.am.common.dataflow.IIndexDataflowHelperFactory
 import org.apache.hyracks.test.support.TestStorageManagerComponentHolder;
 import org.apache.hyracks.tests.am.btree.BTreeSecondaryIndexSearchOperatorTest;
 import org.apache.hyracks.tests.am.common.ITreeIndexOperatorTestHelper;
+import org.junit.Test;
 
 public class LSMBTreeSecondaryIndexSearchOperatorTest extends BTreeSecondaryIndexSearchOperatorTest {
     @Override
@@ -33,6 +34,16 @@ public class LSMBTreeSecondaryIndexSearchOperatorTest extends BTreeSecondaryInde
 
     @Override
     protected IIndexDataflowHelperFactory createDataFlowHelperFactory() {
-        return ((LSMBTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
+        return ((LSMBTreeOperatorTestHelper) testHelper).createSecondaryDataFlowHelperFactory();
+    }
+
+    @Test
+    public void shouldWriteFilterToResult() {
+
+    }
+
+    @Test
+    public void shouldWriteMissingValueIfFilterIsMissing() {
+
     }
 }

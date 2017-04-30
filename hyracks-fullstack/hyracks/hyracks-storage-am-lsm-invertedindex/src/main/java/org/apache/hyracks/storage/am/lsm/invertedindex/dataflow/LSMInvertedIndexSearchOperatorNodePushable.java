@@ -40,9 +40,9 @@ public class LSMInvertedIndexSearchOperatorNodePushable extends IndexSearchOpera
 
     public LSMInvertedIndexSearchOperatorNodePushable(IIndexOperatorDescriptor opDesc, IHyracksTaskContext ctx,
             int partition, IRecordDescriptorProvider recordDescProvider, int queryFieldIndex,
-            IInvertedIndexSearchModifier searchModifier, boolean appendFilter,int numIndexFilterFields, int[] minFilterFieldIndexes,
+            IInvertedIndexSearchModifier searchModifier, boolean appendFilter, int[] minFilterFieldIndexes,
             int[] maxFilterFieldIndexes, boolean isFullTextSearchQuery) throws HyracksDataException {
-        super(opDesc, ctx, partition, recordDescProvider, appendFilter, numIndexFilterFields, minFilterFieldIndexes, maxFilterFieldIndexes);
+        super(opDesc, ctx, partition, recordDescProvider, appendFilter, minFilterFieldIndexes, maxFilterFieldIndexes);
         this.searchModifier = searchModifier;
         this.queryFieldIndex = queryFieldIndex;
         this.isFullTextSearchQuery = isFullTextSearchQuery;

@@ -285,7 +285,7 @@ public class FramewriterTest {
             for (IRecordDescriptorProvider recordDescProvider : recordDescProviders) {
                 for (IHyracksTaskContext ctx : ctxs) {
                     BTreeSearchOperatorNodePushable writer = new BTreeSearchOperatorNodePushable(opDesc, ctx, partition,
-                            recordDescProvider, keys, keys, lowKeyInclusive, highKeyInclusive, false, 0, keys, keys);
+                            recordDescProvider, keys, keys, lowKeyInclusive, highKeyInclusive, false, keys, keys);
                     writers.add(writer);
                 }
             }

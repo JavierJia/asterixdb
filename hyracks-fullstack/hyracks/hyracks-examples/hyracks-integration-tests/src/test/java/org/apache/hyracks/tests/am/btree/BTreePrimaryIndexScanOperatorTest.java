@@ -41,6 +41,8 @@ import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallbackFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.apache.hyracks.tests.am.common.DataSetConstants.*;
+
 public class BTreePrimaryIndexScanOperatorTest extends AbstractBTreeOperatorTest {
 
     @Override
