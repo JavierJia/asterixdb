@@ -40,6 +40,7 @@ import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallbackFactory;
 import org.apache.hyracks.test.support.TestStorageManagerComponentHolder;
 import org.apache.hyracks.tests.am.btree.BTreePrimaryIndexSearchOperatorTest;
 import org.apache.hyracks.tests.am.common.ITreeIndexOperatorTestHelper;
+import org.apache.hyracks.tests.util.NoopMissingWriterFactory;
 import org.junit.Test;
 
 import java.io.DataOutput;
@@ -87,10 +88,10 @@ public class LSMBTreePrimaryIndexSearchOperatorTest extends BTreePrimaryIndexSea
         int[] highKeyFields = { 1 };
 
         BTreeSearchOperatorDescriptor primaryBtreeSearchOp =
-                new BTreeSearchOperatorDescriptor(spec, primaryRecDesc, storageManager, lcManagerProvider,
+                new BTreeSearchOperatorDescriptor(spec, primaryAndFilterRecDesc, storageManager, lcManagerProvider,
                         primarySplitProvider, primaryTypeTraits, primaryComparatorFactories,
                         primaryBloomFilterKeyFields, lowKeyFields, highKeyFields, true, true, dataflowHelperFactory,
-                        false, false, null, NoOpOperationCallbackFactory.INSTANCE, null, null,
+                        false, false, NoopMissingWriterFactory.INSTANCE, NoOpOperationCallbackFactory.INSTANCE, true, null, null,
                         new LinkedMetadataPageManagerFactory());
         PartitionConstraintHelper.addAbsoluteLocationConstraint(spec, primaryBtreeSearchOp, NC1_ID);
 

@@ -70,8 +70,14 @@ public class DataSetConstants {
                     new UTF8StringSerializerDeserializer(), new UTF8StringSerializerDeserializer(),
                     new UTF8StringSerializerDeserializer() });
 
-    // field, type and key declarations for secondary indexes
+    public static final RecordDescriptor primaryAndFilterRecDesc = new RecordDescriptor(
+            new ISerializerDeserializer[] { new UTF8StringSerializerDeserializer(),
+                    new UTF8StringSerializerDeserializer(), new UTF8StringSerializerDeserializer(),
+                    new UTF8StringSerializerDeserializer(), new UTF8StringSerializerDeserializer(),
+                    new UTF8StringSerializerDeserializer(), new UTF8StringSerializerDeserializer(),
+                    new UTF8StringSerializerDeserializer() });
 
+    // field, type and key declarations for secondary indexes
 
     public static final int secondaryKeyFieldCount = 2;
     public static final int[] secondaryFieldPermutationA = { 3, 0 };

@@ -49,6 +49,7 @@ import org.apache.hyracks.storage.am.common.dataflow.IndexDropOperatorDescriptor
 import org.apache.hyracks.storage.am.common.dataflow.TreeIndexBulkLoadOperatorDescriptor;
 import org.apache.hyracks.storage.am.common.dataflow.TreeIndexCreateOperatorDescriptor;
 import org.apache.hyracks.storage.am.common.dataflow.TreeIndexInsertUpdateDeleteOperatorDescriptor;
+import org.apache.hyracks.storage.am.common.freepage.AppendOnlyLinkedMetadataPageManagerFactory;
 import org.apache.hyracks.storage.am.common.freepage.LinkedMetadataPageManagerFactory;
 import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallbackFactory;
 import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
@@ -57,6 +58,7 @@ import org.apache.hyracks.storage.common.file.TransientLocalResourceFactoryProvi
 import org.apache.hyracks.test.support.TestIndexLifecycleManagerProvider;
 import org.apache.hyracks.test.support.TestStorageManagerComponentHolder;
 import org.apache.hyracks.test.support.TestStorageManager;
+import org.apache.hyracks.test.support.TestUtils;
 import org.apache.hyracks.tests.am.common.ITreeIndexOperatorTestHelper;
 import org.apache.hyracks.tests.integration.AbstractIntegrationTest;
 import org.junit.After;
@@ -76,7 +78,7 @@ public abstract class AbstractBTreeOperatorTest extends AbstractIntegrationTest 
     // to be set by subclasses
     protected String primaryFileName;
     protected IFileSplitProvider primarySplitProvider;
-    protected IPageManagerFactory pageManagerFactory = new LinkedMetadataPageManagerFactory();
+    protected IPageManagerFactory pageManagerFactory = AppendOnlyLinkedMetadataPageManagerFactory.INSTANCE;
 
     protected String secondaryFileName;
     protected IFileSplitProvider secondarySplitProvider;
@@ -94,7 +96,6 @@ public abstract class AbstractBTreeOperatorTest extends AbstractIntegrationTest 
         primaryFileName = testHelper.getPrimaryIndexName();
         primarySplitProvider =
                 new ConstantFileSplitProvider(new FileSplit[] { new ManagedFileSplit(NC1_ID, primaryFileName) });
-        secondaryFileName = testHelper.getSecondaryIndexName();
         secondarySplitProvider =
                 new ConstantFileSplitProvider(new FileSplit[] { new ManagedFileSplit(NC1_ID, secondaryFileName) });
     }
