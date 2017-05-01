@@ -63,7 +63,7 @@ import org.apache.hyracks.tests.integration.AbstractIntegrationTest;
 import org.junit.After;
 import org.junit.Before;
 
-import static org.apache.hyracks.tests.am.common.DataSetConstants.*;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.*;
 
 public abstract class AbstractBTreeOperatorTest extends AbstractIntegrationTest {
     static {

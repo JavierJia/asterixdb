@@ -41,7 +41,7 @@ import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallbackFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.apache.hyracks.tests.am.common.DataSetConstants.*;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.*;
 
 public class BTreeSecondaryIndexInsertOperatorTest extends AbstractBTreeOperatorTest {
 

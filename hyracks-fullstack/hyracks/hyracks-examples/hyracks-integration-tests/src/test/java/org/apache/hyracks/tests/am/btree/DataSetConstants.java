@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.hyracks.tests.am.common;
+package org.apache.hyracks.tests.am.btree;
 
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;

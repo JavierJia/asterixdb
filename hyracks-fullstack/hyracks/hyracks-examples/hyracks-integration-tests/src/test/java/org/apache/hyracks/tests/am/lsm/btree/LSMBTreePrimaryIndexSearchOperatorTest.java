@@ -45,7 +45,7 @@ import org.junit.Test;
 
 import java.io.DataOutput;
 
-import static org.apache.hyracks.tests.am.common.DataSetConstants.*;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.*;
 
 public class LSMBTreePrimaryIndexSearchOperatorTest extends BTreePrimaryIndexSearchOperatorTest {
     @Override

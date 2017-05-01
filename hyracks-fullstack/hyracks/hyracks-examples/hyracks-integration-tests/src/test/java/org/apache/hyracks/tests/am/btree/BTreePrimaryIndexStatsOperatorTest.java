@@ -33,9 +33,9 @@ import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallbackFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.apache.hyracks.tests.am.common.DataSetConstants.primaryBloomFilterKeyFields;
-import static org.apache.hyracks.tests.am.common.DataSetConstants.primaryComparatorFactories;
-import static org.apache.hyracks.tests.am.common.DataSetConstants.primaryTypeTraits;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryBloomFilterKeyFields;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryComparatorFactories;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryTypeTraits;
 
 public class BTreePrimaryIndexStatsOperatorTest extends AbstractBTreeOperatorTest {
 

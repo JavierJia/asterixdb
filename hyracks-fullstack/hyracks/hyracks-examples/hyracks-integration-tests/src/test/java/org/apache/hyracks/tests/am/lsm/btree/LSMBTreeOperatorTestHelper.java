@@ -31,7 +31,7 @@ import org.apache.hyracks.tests.am.common.LSMTreeOperatorTestHelper;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.hyracks.tests.am.common.DataSetConstants.*;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.*;
 
 public class LSMBTreeOperatorTestHelper extends LSMTreeOperatorTestHelper {
 

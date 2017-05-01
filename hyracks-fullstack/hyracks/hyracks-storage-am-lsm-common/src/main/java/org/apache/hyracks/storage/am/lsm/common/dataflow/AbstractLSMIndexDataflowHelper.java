@@ -80,6 +80,6 @@ public abstract class AbstractLSMIndexDataflowHelper extends IndexDataflowHelper
 
     @Override
     public int getNumFilterFields() {
-        return filterFields.length;
+        return filterFields == null ? 0 : filterFields.length;
     }
 }
