@@ -205,7 +205,7 @@ public class LSMInvertedIndexSearchCursor implements IIndexCursor {
     }
 
     private ILSMComponentFilter getComponentFilter() {
-        if(accessorIndex < 0){
+        if (accessorIndex < 0) {
             return null;
         }
         return operationalComponents.get(accessorIndex).getLSMComponentFilter();

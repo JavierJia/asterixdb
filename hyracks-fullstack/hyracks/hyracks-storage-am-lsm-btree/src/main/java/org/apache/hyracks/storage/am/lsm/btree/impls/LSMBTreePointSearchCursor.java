@@ -241,11 +241,12 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
     }
 
     private ILSMComponentFilter getFilter() {
-        if(foundTuple){
+        if (foundTuple) {
             return operationalComponents.get(foundIn).getLSMComponentFilter();
         }
         return null;
     }
+
     @Override
     public ICachedPage getPage() {
         // do nothing

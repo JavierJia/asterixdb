@@ -83,7 +83,7 @@ public class LSMBTreeWithBuddySortedCursor extends LSMBTreeWithBuddyAbstractCurs
     }
 
     private ILSMComponentFilter getFilter() {
-        if(foundIn < 0){
+        if (foundIn < 0) {
             return null;
         }
         return operationalComponents.get(foundIn).getLSMComponentFilter();
