@@ -16,17 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.hyracks.dataflow.hadoop.util;
+package org.apache.asterix.common.messaging.api;
 
-import java.io.Serializable;
+import org.apache.asterix.common.api.INcApplicationContext;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.api.messages.IMessage;
 
-import org.apache.hadoop.mapred.JobConf;
+@FunctionalInterface
+public interface INcAddressedMessage extends IMessage {
 
-public interface IHadoopClassFactory extends Serializable {
+    /**
+     * handle the message upon delivery
+     */
+    void handle(INcApplicationContext appCtx) throws HyracksDataException, InterruptedException;
 
-    public Object createMapper(String mapClassName, JobConf conf) throws Exception;
-
-    public Object createReducer(String reduceClassName, JobConf conf) throws Exception;
-
-    public Class loadClass(String className) throws Exception;
 }

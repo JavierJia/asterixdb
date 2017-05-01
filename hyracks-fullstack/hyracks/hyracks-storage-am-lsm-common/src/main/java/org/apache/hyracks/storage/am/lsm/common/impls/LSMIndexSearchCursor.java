@@ -28,7 +28,6 @@ import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.common.api.IIndexCursor;
 import org.apache.hyracks.storage.am.common.api.ITreeIndexCursor;
 import org.apache.hyracks.storage.am.common.ophelpers.MultiComparator;
-import org.apache.hyracks.storage.am.common.tuples.ConcatenatingTupleReference;
 import org.apache.hyracks.storage.am.lsm.common.api.*;
 import org.apache.hyracks.storage.common.buffercache.IBufferCache;
 import org.apache.hyracks.storage.common.buffercache.ICachedPage;
@@ -42,7 +41,7 @@ public abstract class LSMIndexSearchCursor implements ITreeIndexCursor {
     protected PriorityQueue<PriorityQueueElement> outputPriorityQueue;
     protected PriorityQueueComparator pqCmp;
     protected MultiComparator cmp;
-    protected boolean needPush;
+    protected boolean needPushElementIntoQueue;
     protected boolean includeMutableComponent;
     protected ILSMHarness lsmHarness;
 
@@ -52,7 +51,7 @@ public abstract class LSMIndexSearchCursor implements ITreeIndexCursor {
         this.opCtx = opCtx;
         this.returnDeletedTuples = returnDeletedTuples;
         outputElement = null;
-        needPush = false;
+        needPushElementIntoQueue = false;
     }
 
     public ILSMIndexOperationContext getOpCtx() {
@@ -68,7 +67,7 @@ public abstract class LSMIndexSearchCursor implements ITreeIndexCursor {
                 pqes[i] = new PriorityQueueElement(i);
             }
             for (int i = 0; i < rangeCursors.length; i++) {
-                pushIntoPriorityQueue(pqes[i]);
+                pushIntoQueueFromCursorAndReplaceThisElement(pqes[i]);
             }
         } else {
             outputPriorityQueue.clear();
@@ -77,14 +76,14 @@ public abstract class LSMIndexSearchCursor implements ITreeIndexCursor {
                 // size is the same -> re-use
                 for (int i = 0; i < rangeCursors.length; i++) {
                     pqes[i].reset(null);
-                    pushIntoPriorityQueue(pqes[i]);
+                    pushIntoQueueFromCursorAndReplaceThisElement(pqes[i]);
                 }
             } else {
                 // size changed (due to flushes, merges, etc) -> re-create
                 pqes = new PriorityQueueElement[pqInitSize];
                 for (int i = 0; i < rangeCursors.length; i++) {
                     pqes[i] = new PriorityQueueElement(i);
-                    pushIntoPriorityQueue(pqes[i]);
+                    pushIntoQueueFromCursorAndReplaceThisElement(pqes[i]);
                 }
             }
         }
@@ -97,7 +96,7 @@ public abstract class LSMIndexSearchCursor implements ITreeIndexCursor {
     @Override
     public void reset() throws HyracksDataException {
         outputElement = null;
-        needPush = false;
+        needPushElementIntoQueue = false;
 
         try {
             if (outputPriorityQueue != null) {
@@ -126,7 +125,7 @@ public abstract class LSMIndexSearchCursor implements ITreeIndexCursor {
     @Override
     public void next() throws HyracksDataException {
         outputElement = outputPriorityQueue.poll();
-        needPush = true;
+        needPushElementIntoQueue = true;
     }
 
     @Override
@@ -179,7 +178,7 @@ public abstract class LSMIndexSearchCursor implements ITreeIndexCursor {
         return filter == null ? null : filter.getMaxTuple();
     }
 
-    protected boolean pushIntoPriorityQueue(PriorityQueueElement e) throws HyracksDataException {
+    protected boolean pushIntoQueueFromCursorAndReplaceThisElement(PriorityQueueElement e) throws HyracksDataException {
         int cursorIndex = e.getCursorIndex();
         if (rangeCursors[cursorIndex].hasNext()) {
             rangeCursors[cursorIndex].next();
@@ -196,7 +195,7 @@ public abstract class LSMIndexSearchCursor implements ITreeIndexCursor {
     }
 
     protected void checkPriorityQueue() throws HyracksDataException {
-        while (!outputPriorityQueue.isEmpty() || (needPush == true)) {
+        while (!outputPriorityQueue.isEmpty() || (needPushElementIntoQueue == true)) {
             if (!outputPriorityQueue.isEmpty()) {
                 PriorityQueueElement checkElement = outputPriorityQueue.peek();
                 // If there is no previous tuple or the previous tuple can be ignored
@@ -206,7 +205,7 @@ public abstract class LSMIndexSearchCursor implements ITreeIndexCursor {
                         // We cannot push immediately because the tuple may be
                         // modified if hasNext() is called
                         outputElement = outputPriorityQueue.poll();
-                        needPush = true;
+                        needPushElementIntoQueue = true;
                     } else {
                         break;
                     }
@@ -220,21 +219,21 @@ public abstract class LSMIndexSearchCursor implements ITreeIndexCursor {
 
                         // the head element of PQ is useless now
                         PriorityQueueElement e = outputPriorityQueue.poll();
-                        pushIntoPriorityQueue(e);
+                        pushIntoQueueFromCursorAndReplaceThisElement(e);
                     } else {
                         // If the previous tuple and the head tuple are different
                         // the info of previous tuple is useless
-                        if (needPush == true) {
-                            pushIntoPriorityQueue(outputElement);
-                            needPush = false;
+                        if (needPushElementIntoQueue == true) {
+                            pushIntoQueueFromCursorAndReplaceThisElement(outputElement);
+                            needPushElementIntoQueue = false;
                         }
                         outputElement = null;
                     }
                 }
             } else {
                 // the priority queue is empty and needPush
-                pushIntoPriorityQueue(outputElement);
-                needPush = false;
+                pushIntoQueueFromCursorAndReplaceThisElement(outputElement);
+                needPushElementIntoQueue = false;
                 outputElement = null;
             }
         }

@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.hyracks</groupId>
   <artifactId>apache-hyracks</artifactId>
-  <version>0.3.1-SNAPSHOT</version>
+  <version>0.3.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>hyracks-ecosystem-full-stack</name>
   <url>https://asterixdb.apache.org/</url>
@@ -225,6 +225,9 @@
             <licenseFamily implementation="org.apache.rat.license.Apache20LicenseFamily"/>
           </licenseFamilies>
           <excludeSubProjects>true</excludeSubProjects>
+          <excludes combine.children="append">
+            <exclude>**/*.iml</exclude>
+          </excludes>
         </configuration>
       </plugin>
       <plugin>

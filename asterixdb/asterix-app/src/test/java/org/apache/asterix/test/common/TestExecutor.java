@@ -45,6 +45,7 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -57,6 +58,7 @@ import org.apache.asterix.test.server.TestServerProvider;
 import org.apache.asterix.testframework.context.TestCaseContext;
 import org.apache.asterix.testframework.context.TestCaseContext.OutputFormat;
 import org.apache.asterix.testframework.context.TestFileContext;
+import org.apache.asterix.testframework.xml.ComparisonEnum;
 import org.apache.asterix.testframework.xml.TestCase.CompilationUnit;
 import org.apache.asterix.testframework.xml.TestGroup;
 import org.apache.commons.io.FileUtils;
@@ -148,7 +150,8 @@ public class TestExecutor {
         return path.delete();
     }
 
-    public void runScriptAndCompareWithResult(File scriptFile, PrintWriter print, File expectedFile, File actualFile)
+    public void runScriptAndCompareWithResult(File scriptFile, PrintWriter print, File expectedFile, File actualFile,
+            ComparisonEnum compare)
             throws Exception {
         System.err.println("Expected results file: " + expectedFile.toString());
         BufferedReader readerExpected =
@@ -157,7 +160,12 @@ public class TestExecutor {
                 new BufferedReader(new InputStreamReader(new FileInputStream(actualFile), "UTF-8"));
         boolean regex = false;
         try {
-            if (actualFile.toString().endsWith(".regex")) {
+            if (ComparisonEnum.BINARY.equals(compare)) {
+                if (!IOUtils.contentEquals(new FileInputStream(actualFile), new FileInputStream(expectedFile))) {
+                    throw new Exception("Result for " + scriptFile + ": actual file did not match expected result");
+                }
+                return;
+            } else if (actualFile.toString().endsWith(".regex")) {
                 runScriptAndCompareWithResultRegex(scriptFile, expectedFile, actualFile);
                 return;
             } else if (actualFile.toString().endsWith(".regexadm")) {
@@ -404,7 +412,12 @@ public class TestExecutor {
     }
 
     protected HttpResponse executeAndCheckHttpRequest(HttpUriRequest method) throws Exception {
-        return checkResponse(executeHttpRequest(method));
+        return checkResponse(executeHttpRequest(method), code -> code == HttpStatus.SC_OK);
+    }
+
+    protected HttpResponse executeAndCheckHttpRequest(HttpUriRequest method, Predicate<Integer> responseCodeValidator)
+            throws Exception {
+        return checkResponse(executeHttpRequest(method), responseCodeValidator);
     }
 
     protected HttpResponse executeHttpRequest(HttpUriRequest method) throws Exception {
@@ -418,8 +431,9 @@ public class TestExecutor {
         }
     }
 
-    protected HttpResponse checkResponse(HttpResponse httpResponse) throws Exception {
-        if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+    protected HttpResponse checkResponse(HttpResponse httpResponse, Predicate<Integer> responseCodeValidator)
+            throws Exception {
+        if (!responseCodeValidator.test(httpResponse.getStatusLine().getStatusCode())) {
             String errorBody = EntityUtils.toString(httpResponse.getEntity());
             String exceptionMsg;
             try {
@@ -451,8 +465,8 @@ public class TestExecutor {
         return response.getEntity().getContent();
     }
 
-    public InputStream executeQueryService(String str, URI uri) throws Exception {
-        return executeQueryService(str, OutputFormat.CLEAN_JSON, uri, new ArrayList<>(), false);
+    public InputStream executeQueryService(String str, URI uri, OutputFormat fmt) throws Exception {
+        return executeQueryService(str, fmt, uri, new ArrayList<>(), false);
     }
 
     public InputStream executeQueryService(String str, OutputFormat fmt, URI uri,
@@ -582,8 +596,13 @@ public class TestExecutor {
     }
 
     public InputStream executeJSONPost(OutputFormat fmt, URI uri) throws Exception {
+        return executeJSONPost(fmt, uri, code -> code == HttpStatus.SC_OK);
+    }
+
+    public InputStream executeJSONPost(OutputFormat fmt, URI uri, Predicate<Integer> responseCodeValidator)
+            throws Exception {
         HttpUriRequest request = constructPostMethod(uri, fmt, new ArrayList<>());
-        HttpResponse response = executeAndCheckHttpRequest(request);
+        HttpResponse response = executeAndCheckHttpRequest(request, responseCodeValidator);
         return response.getEntity().getContent();
     }
 
@@ -755,8 +774,8 @@ public class TestExecutor {
                 if (ctx.getFile().getName().endsWith("aql")) {
                     executeDDL(statement, getEndpoint(Servlets.AQL_DDL));
                 } else {
-                    InputStream resultStream =
-                            executeQueryService(statement, getEndpoint(Servlets.QUERY_SERVICE));
+                    InputStream resultStream = executeQueryService(statement, getEndpoint(Servlets.QUERY_SERVICE),
+                            OutputFormat.CLEAN_JSON);
                     ResultExtractor.extract(resultStream);
                 }
                 break;
@@ -768,8 +787,8 @@ public class TestExecutor {
                 if (ctx.getFile().getName().endsWith("aql")) {
                     executeUpdate(statement, getEndpoint(Servlets.AQL_UPDATE));
                 } else {
-                    InputStream resultStream =
-                            executeQueryService(statement, getEndpoint(Servlets.QUERY_SERVICE));
+                    InputStream resultStream = executeQueryService(statement, getEndpoint(Servlets.QUERY_SERVICE),
+                            OutputFormat.forCompilationUnit(cUnit));
                     ResultExtractor.extract(resultStream);
                 }
                 break;
@@ -869,7 +888,7 @@ public class TestExecutor {
                 writeOutputToFile(actualResultFile, resultStream);
 
                 runScriptAndCompareWithResult(testFile, new PrintWriter(System.err), expectedResultFile,
-                        actualResultFile);
+                        actualResultFile, ComparisonEnum.TEXT);
                 queryCount.increment();
 
                 // Deletes the matched result file.
@@ -892,7 +911,8 @@ public class TestExecutor {
                         + "_qar.adm");
                 writeOutputToFile(qarFile, resultStream);
                 qbcFile = getTestCaseQueryBeforeCrashFile(actualPath, testCaseCtx, cUnit);
-                runScriptAndCompareWithResult(testFile, new PrintWriter(System.err), qbcFile, qarFile);
+                runScriptAndCompareWithResult(testFile, new PrintWriter(System.err), qbcFile, qarFile,
+                        ComparisonEnum.TEXT);
                 break;
             case "txneu": // eu represents erroneous update
                 try {
@@ -983,7 +1003,7 @@ public class TestExecutor {
                     actualResultFile = testCaseCtx.getActualResultFile(cUnit, expectedResultFile, new File(actualPath));
                     writeOutputToFile(actualResultFile, resultStream);
                     runScriptAndCompareWithResult(testFile, new PrintWriter(System.err), expectedResultFile,
-                            actualResultFile);
+                            actualResultFile, cUnit.getOutputDir().getCompare());
                 }
                 queryCount.increment();
                 break;
@@ -1254,7 +1274,7 @@ public class TestExecutor {
         try {
             ArrayList<String> toBeDropped = new ArrayList<>();
             InputStream resultStream = executeQueryService("select dv.DataverseName from Metadata.`Dataverse` as dv;",
-                    getEndpoint(Servlets.QUERY_SERVICE));
+                    getEndpoint(Servlets.QUERY_SERVICE), OutputFormat.CLEAN_JSON);
             String out = IOUtils.toString(resultStream);
             ObjectMapper om = new ObjectMapper();
             om.setConfig(
@@ -1284,8 +1304,8 @@ public class TestExecutor {
                     dropStatement.append(dv);
                     dropStatement.append(";\n");
                 }
-                resultStream =
-                        executeQueryService(dropStatement.toString(), getEndpoint(Servlets.QUERY_SERVICE));
+                resultStream = executeQueryService(dropStatement.toString(), getEndpoint(Servlets.QUERY_SERVICE),
+                        OutputFormat.CLEAN_JSON);
                 ResultExtractor.extract(resultStream);
             }
         } catch (Throwable th) {

@@ -16,16 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.hyracks.yarn.am.manifest;
+package org.apache.asterix.common.messaging.api;
 
-public class NodeController extends AbstractProcess {
-    private String id;
+import org.apache.asterix.common.dataflow.ICcApplicationContext;
+import org.apache.hyracks.api.exceptions.HyracksDataException;
+import org.apache.hyracks.api.messages.IMessage;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+@FunctionalInterface
+public interface ICcAddressedMessage extends IMessage {
 
-    public String getId() {
-        return id;
-    }
+    /**
+     * handle the message upon delivery
+     */
+    void handle(ICcApplicationContext appCtx) throws HyracksDataException, InterruptedException;
+
 }
