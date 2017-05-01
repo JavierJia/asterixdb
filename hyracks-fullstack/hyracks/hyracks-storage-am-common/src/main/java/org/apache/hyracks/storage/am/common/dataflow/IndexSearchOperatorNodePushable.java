@@ -100,7 +100,7 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
             maxFilterKey = new PermutingFrameTupleReference();
             maxFilterKey.setFieldPermutation(maxFilterFieldIndexes);
         }
-        this.numIndexFilterFields = ((IndexDataflowHelper) indexHelper).getNumFilterFields();
+        this.numIndexFilterFields = indexHelper.getNumFilterFields();
     }
 
     protected abstract ISearchPredicate createSearchPredicate();

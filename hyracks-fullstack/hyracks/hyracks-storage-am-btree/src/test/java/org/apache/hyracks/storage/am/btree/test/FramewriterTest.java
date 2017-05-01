@@ -399,6 +399,7 @@ public class FramewriterTest {
             // normal
             indexHelpers[j] = Mockito.mock(IIndexDataflowHelper.class);
             Mockito.when(indexHelpers[j].getIndexInstance()).thenReturn(indexes[i]);
+            Mockito.when(indexHelpers[j].getNumFilterFields()).thenReturn(0);
 
             // throws exception when opened
             j++;

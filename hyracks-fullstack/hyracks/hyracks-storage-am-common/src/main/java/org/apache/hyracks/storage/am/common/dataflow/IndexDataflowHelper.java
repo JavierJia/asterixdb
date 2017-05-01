@@ -69,8 +69,6 @@ public abstract class IndexDataflowHelper implements IIndexDataflowHelper {
 
     protected abstract IIndex createIndexInstance() throws HyracksDataException;
 
-    public abstract int getNumFilterFields();
-
     @Override
     public IIndex getIndexInstance() {
         return index;
