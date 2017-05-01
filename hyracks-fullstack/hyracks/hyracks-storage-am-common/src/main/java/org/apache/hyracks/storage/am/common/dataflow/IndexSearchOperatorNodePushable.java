@@ -275,8 +275,7 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         for (int i = 0; i < numFields; i++) {
             try {
                 nonMatchWriter.writeMissing(out);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
                 LOGGER.warning(e.getMessage());
             }
             nullTuple.addFieldEndOffset();

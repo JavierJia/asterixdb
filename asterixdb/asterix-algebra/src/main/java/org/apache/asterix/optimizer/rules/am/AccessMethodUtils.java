@@ -538,7 +538,6 @@ public class AccessMethodUtils {
         // Optionally add a sort on the primary-index keys before searching the primary index.
         OrderOperator order = null;
         if (sortPrimaryKeys) {
-            //FIXME should sort on filter first
             order = new OrderOperator();
             for (LogicalVariable pkVar : primaryKeyVars) {
                 Mutable<ILogicalExpression> vRef = new MutableObject<>(
