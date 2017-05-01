@@ -54,8 +54,13 @@ public class LSMBTreePrimaryIndexSearchOperatorTest extends BTreePrimaryIndexSea
     }
 
     @Override
-    protected IIndexDataflowHelperFactory createDataFlowHelperFactory() {
+    protected IIndexDataflowHelperFactory createPrimaryDataFlowHelperFactory() {
         return ((LSMBTreeOperatorTestHelper) testHelper).createPrimaryDataFlowHelperFactory();
+    }
+
+    @Override
+    protected IIndexDataflowHelperFactory createSecondaryDataFlowHelperFactory() {
+        return ((LSMBTreeOperatorTestHelper) testHelper).createSecondaryDataFlowHelperFactory();
     }
 
     @Test
@@ -90,9 +95,10 @@ public class LSMBTreePrimaryIndexSearchOperatorTest extends BTreePrimaryIndexSea
         BTreeSearchOperatorDescriptor primaryBtreeSearchOp =
                 new BTreeSearchOperatorDescriptor(spec, primaryAndFilterRecDesc, storageManager, lcManagerProvider,
                         primarySplitProvider, primaryTypeTraits, primaryComparatorFactories,
-                        primaryBloomFilterKeyFields, lowKeyFields, highKeyFields, true, true, dataflowHelperFactory,
-                        false, false, NoopMissingWriterFactory.INSTANCE, NoOpOperationCallbackFactory.INSTANCE, true, null, null,
-                        new LinkedMetadataPageManagerFactory());
+                        primaryBloomFilterKeyFields, lowKeyFields, highKeyFields, true, true,
+                        primaryDataflowHelperFactory,
+                        false, false, NoopMissingWriterFactory.INSTANCE, NoOpOperationCallbackFactory.INSTANCE, true,
+                        null, null, new LinkedMetadataPageManagerFactory());
         PartitionConstraintHelper.addAbsoluteLocationConstraint(spec, primaryBtreeSearchOp, NC1_ID);
 
         IFileSplitProvider outSplits = new ConstantFileSplitProvider(new FileSplit[] { createFile(nc1) });
@@ -107,12 +113,60 @@ public class LSMBTreePrimaryIndexSearchOperatorTest extends BTreePrimaryIndexSea
     }
 
     @Test
-    public void shouldNOTWriteFilterValueIfAppendFilterIsFalse() throws Exception {
+    public void shouldWriteNothingIfGivenFilterValueIsOutOfRange() throws Exception {
+        JobSpecification spec = new JobSpecification();
 
-    }
+        // build tuple containing low and high search key
+        // high key and low key
+        ArrayTupleBuilder tb = new ArrayTupleBuilder((primaryKeyFieldCount + primaryFilterFields.length) * 2);
+        DataOutput dos = tb.getDataOutput();
 
-    @Test
-    public void shouldUseRecordFilterValueToSkipLSMComponents() throws Exception {
+        tb.reset();
+        // low key
+        new UTF8StringSerializerDeserializer().serialize("100", dos);
+        tb.addFieldEndOffset();
+        // high key
+        new UTF8StringSerializerDeserializer().serialize("200", dos);
+        tb.addFieldEndOffset();
+        // min filter
+        new UTF8StringSerializerDeserializer().serialize("9999", dos);
+        tb.addFieldEndOffset();
+        // max filter
+        new UTF8StringSerializerDeserializer().serialize("9999", dos);
+        tb.addFieldEndOffset();
 
+        ISerializerDeserializer[] keyRecDescSers =
+                { new UTF8StringSerializerDeserializer(), new UTF8StringSerializerDeserializer(),
+                        new UTF8StringSerializerDeserializer(), new UTF8StringSerializerDeserializer() };
+        RecordDescriptor keyRecDesc = new RecordDescriptor(keyRecDescSers);
+
+        ConstantTupleSourceOperatorDescriptor keyProviderOp =
+                new ConstantTupleSourceOperatorDescriptor(spec, keyRecDesc, tb.getFieldEndOffsets(), tb.getByteArray(),
+                        tb.getSize());
+        PartitionConstraintHelper.addAbsoluteLocationConstraint(spec, keyProviderOp, NC1_ID);
+
+        int[] lowKeyFields = { 0 };
+        int[] highKeyFields = { 1 };
+        int[] minFilterFields = { 2 };
+        int[] maxFilterFields = { 3 };
+
+        BTreeSearchOperatorDescriptor primaryBtreeSearchOp =
+                new BTreeSearchOperatorDescriptor(spec, primaryAndFilterRecDesc, storageManager, lcManagerProvider,
+                        primarySplitProvider, primaryTypeTraits, primaryComparatorFactories,
+                        primaryBloomFilterKeyFields, lowKeyFields, highKeyFields, true, true,
+                        primaryDataflowHelperFactory,
+                        false, false, NoopMissingWriterFactory.INSTANCE, NoOpOperationCallbackFactory.INSTANCE, true,
+                        minFilterFields, maxFilterFields, new LinkedMetadataPageManagerFactory());
+        PartitionConstraintHelper.addAbsoluteLocationConstraint(spec, primaryBtreeSearchOp, NC1_ID);
+
+        IFileSplitProvider outSplits = new ConstantFileSplitProvider(new FileSplit[] { createFile(nc1) });
+        IOperatorDescriptor printer = new PlainFileWriterOperatorDescriptor(spec, outSplits, ",");
+        PartitionConstraintHelper.addAbsoluteLocationConstraint(spec, printer, NC1_ID);
+
+        spec.connect(new OneToOneConnectorDescriptor(spec), keyProviderOp, 0, primaryBtreeSearchOp, 0);
+        spec.connect(new OneToOneConnectorDescriptor(spec), primaryBtreeSearchOp, 0, printer, 0);
+
+        spec.addRoot(printer);
+        runTest(spec);
     }
 }

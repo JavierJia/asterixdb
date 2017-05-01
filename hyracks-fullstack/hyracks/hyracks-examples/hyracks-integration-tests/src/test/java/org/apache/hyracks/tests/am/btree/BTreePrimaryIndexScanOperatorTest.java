@@ -36,7 +36,6 @@ import org.apache.hyracks.dataflow.std.file.PlainFileWriterOperatorDescriptor;
 import org.apache.hyracks.dataflow.std.misc.ConstantTupleSourceOperatorDescriptor;
 import org.apache.hyracks.storage.am.btree.dataflow.BTreeSearchOperatorDescriptor;
 import org.apache.hyracks.storage.am.common.dataflow.IIndexDataflowHelperFactory;
-import org.apache.hyracks.storage.am.common.freepage.LinkedMetadataPageManagerFactory;
 import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallbackFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +77,7 @@ public class BTreePrimaryIndexScanOperatorTest extends AbstractBTreeOperatorTest
 
         BTreeSearchOperatorDescriptor primaryBtreeSearchOp = new BTreeSearchOperatorDescriptor(spec, primaryRecDesc,
                 storageManager, lcManagerProvider, primarySplitProvider, primaryTypeTraits, primaryComparatorFactories,
-                primaryBloomFilterKeyFields, lowKeyFields, highKeyFields, true, true, dataflowHelperFactory, false,
+                primaryBloomFilterKeyFields, lowKeyFields, highKeyFields, true, true, primaryDataflowHelperFactory, false,
                 false, null, NoOpOperationCallbackFactory.INSTANCE, null, null, pageManagerFactory);
         PartitionConstraintHelper.addAbsoluteLocationConstraint(spec, primaryBtreeSearchOp, NC1_ID);
 
@@ -94,7 +93,12 @@ public class BTreePrimaryIndexScanOperatorTest extends AbstractBTreeOperatorTest
     }
 
     @Override
-    protected IIndexDataflowHelperFactory createDataFlowHelperFactory() {
+    protected IIndexDataflowHelperFactory createPrimaryDataFlowHelperFactory() {
+        return ((BTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
+    }
+
+    @Override
+    protected IIndexDataflowHelperFactory createSecondaryDataFlowHelperFactory() {
         return ((BTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
     }
 

@@ -49,6 +49,7 @@ public class DataSetConstants {
     public static int[] primaryFieldPermutation = { 0, 1, 2, 4, 5, 7 };
     public static final int[] primaryFilterFields = new int[] { 0 };
     public static final int[] primaryBtreeFields = new int[] { 0, 1, 2, 3, 4, 5 };
+
     public static final ITypeTraits[] primaryFilterTypeTraits = new ITypeTraits[] { UTF8StringPointable.TYPE_TRAITS };
     public static final IBinaryComparatorFactory[] primaryFilterCmpFactories =
             new IBinaryComparatorFactory[] { PointableBinaryComparatorFactory.of(UTF8StringPointable.FACTORY) };
@@ -98,5 +99,9 @@ public class DataSetConstants {
 
     public static final RecordDescriptor secondaryRecDesc = new RecordDescriptor(
             new ISerializerDeserializer[] { new UTF8StringSerializerDeserializer(),
+                    new UTF8StringSerializerDeserializer() });
+    public static final RecordDescriptor secondaryWithFilterRecDesc = new RecordDescriptor(
+            new ISerializerDeserializer[] { new UTF8StringSerializerDeserializer(),
+                    new UTF8StringSerializerDeserializer(), new UTF8StringSerializerDeserializer(),
                     new UTF8StringSerializerDeserializer() });
 }

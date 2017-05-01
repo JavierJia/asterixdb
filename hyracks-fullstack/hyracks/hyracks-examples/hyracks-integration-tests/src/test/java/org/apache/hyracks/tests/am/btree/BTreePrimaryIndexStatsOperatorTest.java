@@ -53,7 +53,7 @@ public class BTreePrimaryIndexStatsOperatorTest extends AbstractBTreeOperatorTes
 
         TreeIndexStatsOperatorDescriptor primaryStatsOp = new TreeIndexStatsOperatorDescriptor(spec, storageManager,
                 lcManagerProvider, primarySplitProvider, primaryTypeTraits, primaryComparatorFactories,
-                primaryBloomFilterKeyFields, dataflowHelperFactory, NoOpOperationCallbackFactory.INSTANCE,
+                primaryBloomFilterKeyFields, primaryDataflowHelperFactory, NoOpOperationCallbackFactory.INSTANCE,
                 pageManagerFactory);
         PartitionConstraintHelper.addAbsoluteLocationConstraint(spec, primaryStatsOp, NC1_ID);
         IFileSplitProvider outSplits = new ConstantFileSplitProvider(new FileSplit[] { createFile(nc1) });
@@ -66,7 +66,12 @@ public class BTreePrimaryIndexStatsOperatorTest extends AbstractBTreeOperatorTes
     }
 
     @Override
-    protected IIndexDataflowHelperFactory createDataFlowHelperFactory() {
+    protected IIndexDataflowHelperFactory createPrimaryDataFlowHelperFactory() {
+        return ((BTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
+    }
+
+    @Override
+    protected IIndexDataflowHelperFactory createSecondaryDataFlowHelperFactory() {
         return ((BTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
     }
 

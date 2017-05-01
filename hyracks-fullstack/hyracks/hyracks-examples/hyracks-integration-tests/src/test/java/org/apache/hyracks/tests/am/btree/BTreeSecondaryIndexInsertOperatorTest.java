@@ -88,7 +88,7 @@ public class BTreeSecondaryIndexInsertOperatorTest extends AbstractBTreeOperator
         BTreeSearchOperatorDescriptor secondaryBtreeSearchOp = new BTreeSearchOperatorDescriptor(spec,
                 secondaryRecDesc, storageManager, lcManagerProvider, secondarySplitProvider, secondaryTypeTraits,
                 secondaryComparatorFactories, secondaryBloomFilterKeyFields, secondaryLowKeyFields,
-                secondaryHighKeyFields, true, true, dataflowHelperFactory, false, false, null,
+                secondaryHighKeyFields, true, true, primaryDataflowHelperFactory, false, false, null,
                 NoOpOperationCallbackFactory.INSTANCE, null, null, new LinkedMetadataPageManagerFactory());
 
         PartitionConstraintHelper.addAbsoluteLocationConstraint(spec, secondaryBtreeSearchOp, NC1_ID);
@@ -102,7 +102,7 @@ public class BTreeSecondaryIndexInsertOperatorTest extends AbstractBTreeOperator
         BTreeSearchOperatorDescriptor primaryBtreeSearchOp = new BTreeSearchOperatorDescriptor(spec, primaryRecDesc,
                 storageManager, lcManagerProvider, primarySplitProvider, primaryTypeTraits, primaryComparatorFactories,
                 primaryBloomFilterKeyFields, primaryLowKeyFields, primaryHighKeyFields, true, true,
-                dataflowHelperFactory, false, false, null, NoOpOperationCallbackFactory.INSTANCE, null, null,
+                primaryDataflowHelperFactory, false, false, null, NoOpOperationCallbackFactory.INSTANCE, null, null,
                 new LinkedMetadataPageManagerFactory());
         PartitionConstraintHelper.addAbsoluteLocationConstraint(spec, primaryBtreeSearchOp, NC1_ID);
 
@@ -119,7 +119,12 @@ public class BTreeSecondaryIndexInsertOperatorTest extends AbstractBTreeOperator
     }
 
     @Override
-    protected IIndexDataflowHelperFactory createDataFlowHelperFactory() {
+    protected IIndexDataflowHelperFactory createPrimaryDataFlowHelperFactory() {
+        return ((BTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
+    }
+
+    @Override
+    protected IIndexDataflowHelperFactory createSecondaryDataFlowHelperFactory() {
         return ((BTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
     }
 
