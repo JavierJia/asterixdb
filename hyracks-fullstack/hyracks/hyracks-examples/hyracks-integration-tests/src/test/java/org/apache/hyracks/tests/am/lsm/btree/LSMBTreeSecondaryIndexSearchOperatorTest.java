@@ -45,7 +45,15 @@ import org.junit.Test;
 
 import java.io.DataOutput;
 
-import static org.apache.hyracks.tests.am.btree.DataSetConstants.*;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryBloomFilterKeyFields;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryComparatorFactories;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryRecDesc;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryTypeTraits;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryBloomFilterKeyFields;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryComparatorFactories;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryKeyFieldCount;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryTypeTraits;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryWithFilterRecDesc;
 
 public class LSMBTreeSecondaryIndexSearchOperatorTest extends BTreeSecondaryIndexSearchOperatorTest {
     @Override
@@ -54,13 +62,8 @@ public class LSMBTreeSecondaryIndexSearchOperatorTest extends BTreeSecondaryInde
     }
 
     @Override
-    protected IIndexDataflowHelperFactory createPrimaryDataFlowHelperFactory() {
-        return ((LSMBTreeOperatorTestHelper) testHelper).createPrimaryDataFlowHelperFactory();
-    }
-
-    @Override
-    protected IIndexDataflowHelperFactory createSecondaryDataFlowHelperFactory() {
-        return ((LSMBTreeOperatorTestHelper) testHelper).createSecondaryDataFlowHelperFactory();
+    protected IIndexDataflowHelperFactory createDataFlowHelperFactory(int[] btreeFields, int[] filterFields) {
+        return ((LSMBTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory(btreeFields, filterFields);
     }
 
     @Test

@@ -19,9 +19,6 @@
 
 package org.apache.hyracks.tests.am.btree;
 
-import java.io.DataOutput;
-import java.io.File;
-
 import org.apache.hyracks.api.constraints.PartitionConstraintHelper;
 import org.apache.hyracks.api.dataflow.value.IBinaryComparatorFactory;
 import org.apache.hyracks.api.dataflow.value.RecordDescriptor;
@@ -56,14 +53,34 @@ import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
 import org.apache.hyracks.storage.common.IStorageManager;
 import org.apache.hyracks.storage.common.file.TransientLocalResourceFactoryProvider;
 import org.apache.hyracks.test.support.TestIndexLifecycleManagerProvider;
-import org.apache.hyracks.test.support.TestStorageManagerComponentHolder;
 import org.apache.hyracks.test.support.TestStorageManager;
+import org.apache.hyracks.test.support.TestStorageManagerComponentHolder;
 import org.apache.hyracks.tests.am.common.ITreeIndexOperatorTestHelper;
 import org.apache.hyracks.tests.integration.AbstractIntegrationTest;
 import org.junit.After;
 import org.junit.Before;
 
-import static org.apache.hyracks.tests.am.btree.DataSetConstants.*;
+import java.io.DataOutput;
+import java.io.File;
+
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.inputParserFactories;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.inputRecordDesc;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryBloomFilterKeyFields;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryBtreeFields;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryComparatorFactories;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryFieldPermutation;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryFilterFields;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryKeyFieldCount;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryRecDesc;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryTypeTraits;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryBloomFilterKeyFields;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryBtreeFields;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryComparatorFactories;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryFieldPermutationA;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryFieldPermutationB;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryFilterFields;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryRecDesc;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.secondaryTypeTraits;
 
 public abstract class AbstractBTreeOperatorTest extends AbstractIntegrationTest {
     static {
@@ -90,8 +107,8 @@ public abstract class AbstractBTreeOperatorTest extends AbstractIntegrationTest 
     @Before
     public void setup() throws Exception {
         testHelper = createTestHelper();
-        primaryDataflowHelperFactory = createPrimaryDataFlowHelperFactory();
-        secondaryDataflowHelperFactory = createSecondaryDataFlowHelperFactory();
+        primaryDataflowHelperFactory = createDataFlowHelperFactory(primaryBtreeFields, primaryFilterFields);
+        secondaryDataflowHelperFactory = createDataFlowHelperFactory(secondaryBtreeFields, secondaryFilterFields);
         String primaryFileName = testHelper.getPrimaryIndexName();
         primarySplitProvider =
                 new ConstantFileSplitProvider(new FileSplit[] { new ManagedFileSplit(NC1_ID, primaryFileName) });
@@ -100,9 +117,7 @@ public abstract class AbstractBTreeOperatorTest extends AbstractIntegrationTest 
                 new ConstantFileSplitProvider(new FileSplit[] { new ManagedFileSplit(NC1_ID, secondaryFileName) });
     }
 
-    protected abstract IIndexDataflowHelperFactory createPrimaryDataFlowHelperFactory();
-
-    protected abstract IIndexDataflowHelperFactory createSecondaryDataFlowHelperFactory();
+    protected abstract IIndexDataflowHelperFactory createDataFlowHelperFactory(int [] btreeFields, int[] filterFields);
 
     public void createPrimaryIndex() throws Exception {
         JobSpecification spec = new JobSpecification();

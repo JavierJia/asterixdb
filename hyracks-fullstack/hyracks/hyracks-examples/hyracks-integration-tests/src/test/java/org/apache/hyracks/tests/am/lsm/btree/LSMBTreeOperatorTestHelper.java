@@ -31,7 +31,8 @@ import org.apache.hyracks.tests.am.common.LSMTreeOperatorTestHelper;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.hyracks.tests.am.btree.DataSetConstants.*;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.filterCmpFactories;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.filterTypeTraits;
 
 public class LSMBTreeOperatorTestHelper extends LSMTreeOperatorTestHelper {
 
@@ -46,20 +47,12 @@ public class LSMBTreeOperatorTestHelper extends LSMTreeOperatorTestHelper {
         super(ioManager);
     }
 
-    public IIndexDataflowHelperFactory createPrimaryDataFlowHelperFactory() {
+    public IIndexDataflowHelperFactory createDataFlowHelperFactory(int[] btreeFields, int[] filterFields) {
         return new LSMBTreeDataflowHelperFactory(virtualBufferCacheProvider, new ConstantMergePolicyFactory(),
                 MERGE_POLICY_PROPERTIES, ThreadCountingOperationTrackerFactory.INSTANCE,
                 SynchronousSchedulerProvider.INSTANCE, NoOpIOOperationCallback.INSTANCE,
-                DEFAULT_BLOOM_FILTER_FALSE_POSITIVE_RATE, true, primaryFilterTypeTraits, primaryFilterCmpFactories,
-                primaryBtreeFields, primaryFilterFields, true);
-    }
-
-    public IIndexDataflowHelperFactory createSecondaryDataFlowHelperFactory() {
-        return new LSMBTreeDataflowHelperFactory(virtualBufferCacheProvider, new ConstantMergePolicyFactory(),
-                MERGE_POLICY_PROPERTIES, ThreadCountingOperationTrackerFactory.INSTANCE,
-                SynchronousSchedulerProvider.INSTANCE, NoOpIOOperationCallback.INSTANCE,
-                DEFAULT_BLOOM_FILTER_FALSE_POSITIVE_RATE, true, secondaryFilterTypeTraits, secondaryFilterCmpFactories,
-                secondaryBtreeFields, secondaryFilterFields, true);
+                DEFAULT_BLOOM_FILTER_FALSE_POSITIVE_RATE, true, filterTypeTraits, filterCmpFactories,
+                btreeFields, filterFields, true);
     }
 
 }

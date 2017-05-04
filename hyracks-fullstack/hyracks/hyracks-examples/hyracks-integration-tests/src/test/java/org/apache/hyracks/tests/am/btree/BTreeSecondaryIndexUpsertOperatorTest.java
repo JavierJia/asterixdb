@@ -118,12 +118,7 @@ public class BTreeSecondaryIndexUpsertOperatorTest extends AbstractBTreeOperator
     }
 
     @Override
-    protected IIndexDataflowHelperFactory createPrimaryDataFlowHelperFactory() {
-        return ((BTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
-    }
-
-    @Override
-    protected IIndexDataflowHelperFactory createSecondaryDataFlowHelperFactory() {
+    protected IIndexDataflowHelperFactory createDataFlowHelperFactory(int[] btreeFields, int[] filterFields) {
         return ((BTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
     }
 

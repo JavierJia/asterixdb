@@ -50,8 +50,8 @@ public class DataSetConstants {
     public static final int[] primaryFilterFields = new int[] { 0 };
     public static final int[] primaryBtreeFields = new int[] { 0, 1, 2, 3, 4, 5 };
 
-    public static final ITypeTraits[] primaryFilterTypeTraits = new ITypeTraits[] { UTF8StringPointable.TYPE_TRAITS };
-    public static final IBinaryComparatorFactory[] primaryFilterCmpFactories =
+    public static final ITypeTraits[] filterTypeTraits = new ITypeTraits[] { UTF8StringPointable.TYPE_TRAITS };
+    public static final IBinaryComparatorFactory[] filterCmpFactories =
             new IBinaryComparatorFactory[] { PointableBinaryComparatorFactory.of(UTF8StringPointable.FACTORY) };
 
     public static final ITypeTraits[] primaryTypeTraits =
@@ -86,9 +86,6 @@ public class DataSetConstants {
     public static final int[] secondaryFilterFields = new int[] { 1 };
     public static final int[] secondaryBtreeFields = new int[] { 0, 1 };
     public static final int[] secondaryBloomFilterKeyFields = new int[] { 0, 1 };
-    public static final ITypeTraits[] secondaryFilterTypeTraits = new ITypeTraits[] { UTF8StringPointable.TYPE_TRAITS };
-    public static final IBinaryComparatorFactory[] secondaryFilterCmpFactories =
-            new IBinaryComparatorFactory[] { PointableBinaryComparatorFactory.of(UTF8StringPointable.FACTORY) };
 
     public static final ITypeTraits[] secondaryTypeTraits =
             new ITypeTraits[] { UTF8StringPointable.TYPE_TRAITS, UTF8StringPointable.TYPE_TRAITS };

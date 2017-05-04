@@ -19,9 +19,6 @@
 
 package org.apache.hyracks.tests.am.rtree;
 
-import java.io.DataOutput;
-import java.io.File;
-
 import org.apache.hyracks.api.constraints.PartitionConstraintHelper;
 import org.apache.hyracks.api.dataflow.value.*;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
@@ -71,6 +68,9 @@ import org.apache.hyracks.tests.am.common.ITreeIndexOperatorTestHelper;
 import org.apache.hyracks.tests.integration.AbstractIntegrationTest;
 import org.junit.After;
 import org.junit.Before;
+
+import java.io.DataOutput;
+import java.io.File;
 
 public abstract class AbstractRTreeOperatorTest extends AbstractIntegrationTest {
     static {

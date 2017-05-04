@@ -19,8 +19,6 @@
 
 package org.apache.hyracks.tests.am.btree;
 
-import java.io.DataOutput;
-
 import org.apache.hyracks.api.constraints.PartitionConstraintHelper;
 import org.apache.hyracks.api.dataflow.IOperatorDescriptor;
 import org.apache.hyracks.api.dataflow.value.ISerializerDeserializer;
@@ -40,7 +38,13 @@ import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallbackFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.apache.hyracks.tests.am.btree.DataSetConstants.*;
+import java.io.DataOutput;
+
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryBloomFilterKeyFields;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryComparatorFactories;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryKeyFieldCount;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryRecDesc;
+import static org.apache.hyracks.tests.am.btree.DataSetConstants.primaryTypeTraits;
 
 public class BTreePrimaryIndexScanOperatorTest extends AbstractBTreeOperatorTest {
 
@@ -93,12 +97,7 @@ public class BTreePrimaryIndexScanOperatorTest extends AbstractBTreeOperatorTest
     }
 
     @Override
-    protected IIndexDataflowHelperFactory createPrimaryDataFlowHelperFactory() {
-        return ((BTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
-    }
-
-    @Override
-    protected IIndexDataflowHelperFactory createSecondaryDataFlowHelperFactory() {
+    protected IIndexDataflowHelperFactory createDataFlowHelperFactory(int[] btreeFields, int[] filterFields) {
         return ((BTreeOperatorTestHelper) testHelper).createDataFlowHelperFactory();
     }
 

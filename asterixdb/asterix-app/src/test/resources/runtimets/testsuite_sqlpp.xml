@@ -2736,6 +2736,26 @@
         <output-dir compare="Text">core-02</output-dir>
       </compilation-unit>
     </test-case>
+    <test-case FilePath="group-by">
+      <compilation-unit name="policy">
+        <output-dir compare="Text">policy</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="group-by">
+      <compilation-unit name="policy-02">
+        <output-dir compare="Text">policy-02</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="group-by">
+      <compilation-unit name="policy-03">
+        <output-dir compare="Text">policy-03</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="group-by">
+      <compilation-unit name="policy-04">
+        <output-dir compare="Text">policy-04</output-dir>
+      </compilation-unit>
+    </test-case>
   </test-group>
   <test-group name="index-join">
     <test-case FilePath="index-join">
@@ -4174,6 +4194,11 @@
     <test-case FilePath="null-missing">
       <compilation-unit name="query-ASTERIXDB-1689">
         <output-dir compare="Text">query-ASTERIXDB-1689</output-dir>
+      </compilation-unit>
+    </test-case>
+    <test-case FilePath="null-missing">
+      <compilation-unit name="print-ASTERIXDB-1885">
+        <output-dir compare="Text">print-ASTERIXDB-1885</output-dir>
       </compilation-unit>
     </test-case>
   </test-group>
