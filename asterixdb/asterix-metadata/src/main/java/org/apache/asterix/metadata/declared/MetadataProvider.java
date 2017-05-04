@@ -447,8 +447,8 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
     public Pair<IOperatorDescriptor, AlgebricksPartitionConstraint> buildBtreeRuntime(JobSpecification jobSpec,
             IOperatorSchema opSchema, IVariableTypeEnvironment typeEnv, JobGenContext context, boolean retainInput,
             boolean retainMissing, Dataset dataset, String indexName, int[] lowKeyFields, int[] highKeyFields,
-            boolean lowKeyInclusive, boolean highKeyInclusive, int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes)
-            throws AlgebricksException {
+            boolean lowKeyInclusive, boolean highKeyInclusive, boolean propagateFilter, int[] minFilterFieldIndexes,
+            int[] maxFilterFieldIndexes) throws AlgebricksException {
         boolean isSecondary = true;
         int numSecondaryKeys = 0;
         try {
@@ -533,7 +533,7 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
                         lowKeyInclusive, highKeyInclusive,
                         dataset.getIndexDataflowHelperFactory(this, theIndex, itemType, metaType, compactionInfo.first,
                                 compactionInfo.second),
-                        retainInput, retainMissing, context.getMissingWriterFactory(), searchCallbackFactory,
+                        retainInput, retainMissing, context.getMissingWriterFactory(), searchCallbackFactory, propagateFilter,
                         minFilterFieldIndexes, maxFilterFieldIndexes, metadataPageManagerFactory);
             } else {
                 IIndexDataflowHelperFactory indexDataflowHelperFactory = dataset.getIndexDataflowHelperFactory(this,
@@ -553,7 +553,8 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
     public Pair<IOperatorDescriptor, AlgebricksPartitionConstraint> buildRtreeRuntime(JobSpecification jobSpec,
             List<LogicalVariable> outputVars, IOperatorSchema opSchema, IVariableTypeEnvironment typeEnv,
             JobGenContext context, boolean retainInput, boolean retainMissing, Dataset dataset, String indexName,
-            int[] keyFields, int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes) throws AlgebricksException {
+            int[] keyFields, boolean propagateFilter, int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes)
+            throws AlgebricksException {
         try {
             ARecordType recType = (ARecordType) findType(dataset.getItemTypeDataverseName(), dataset.getItemTypeName());
             int numPrimaryKeys = DatasetUtil.getPartitioningKeys(dataset).size();
@@ -638,7 +639,7 @@ public class MetadataProvider implements IMetadataProvider<DataSourceId, String>
                 rtreeSearchOp = new RTreeSearchOperatorDescriptor(jobSpec, outputRecDesc,
                         appContext.getStorageManager(), appContext.getIndexLifecycleManagerProvider(), spPc.first,
                         typeTraits, comparatorFactories, keyFields, indexDataflowHelperFactory, retainInput,
-                        retainMissing, context.getMissingWriterFactory(), searchCallbackFactory, minFilterFieldIndexes,
+                        retainMissing, context.getMissingWriterFactory(), searchCallbackFactory, propagateFilter, minFilterFieldIndexes,
                         maxFilterFieldIndexes, metadataPageManagerFactory);
             } else {
                 // Create the operator

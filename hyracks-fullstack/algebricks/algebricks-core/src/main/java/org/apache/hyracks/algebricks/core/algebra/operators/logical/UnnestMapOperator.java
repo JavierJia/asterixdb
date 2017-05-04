@@ -51,7 +51,7 @@ public class UnnestMapOperator extends AbstractUnnestMapOperator {
     // this operator propagates all input variables.
     @Override
     public IVariableTypeEnvironment computeOutputTypeEnvironment(ITypingContext ctx) throws AlgebricksException {
-        IVariableTypeEnvironment env = null;
+        IVariableTypeEnvironment env;
         if (propagateInput) {
             env = createPropagatingAllInputsTypeEnvironment(ctx);
         } else {
@@ -60,6 +60,10 @@ public class UnnestMapOperator extends AbstractUnnestMapOperator {
         int n = variables.size();
         for (int i = 0; i < n; i++) {
             env.setVarType(variables.get(i), variableTypes.get(i));
+        }
+        if (propagateIndexFilter) {
+            env.setVarType(minIndexFilterVar, indexFilterType);
+            env.setVarType(maxIndexFilterVar, indexFilterType);
         }
         return env;
     }
