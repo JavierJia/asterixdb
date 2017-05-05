@@ -123,6 +123,7 @@ public class InvertedIndexPOperator extends IndexSearchPOperator {
         }
         int[] keyIndexes = getKeyIndexes(jobGenParams.getKeyVarList(), inputSchemas);
 
+        boolean propagateIndexFilter = unnestMapOp.getPropagateIndexFilter();
         int[] minFilterFieldIndexes = getKeyIndexes(unnestMapOp.getMinFilterVars(), inputSchemas);
         int[] maxFilterFieldIndexes = getKeyIndexes(unnestMapOp.getMaxFilterVars(), inputSchemas);
         boolean retainNull = false;
@@ -136,7 +137,8 @@ public class InvertedIndexPOperator extends IndexSearchPOperator {
                         jobGenParams.getRetainInput(), retainNull, jobGenParams.getDatasetName(), dataset,
                         jobGenParams.getIndexName(), jobGenParams.getSearchKeyType(), keyIndexes,
                         jobGenParams.getSearchModifierType(), jobGenParams.getSimilarityThreshold(),
-                        minFilterFieldIndexes, maxFilterFieldIndexes, jobGenParams.getIsFullTextSearch());
+                        propagateIndexFilter, minFilterFieldIndexes, maxFilterFieldIndexes,
+                        jobGenParams.getIsFullTextSearch());
 
         // Contribute operator in hyracks job.
         builder.contributeHyracksOperator(unnestMapOp, invIndexSearch.first);
@@ -150,8 +152,8 @@ public class InvertedIndexPOperator extends IndexSearchPOperator {
             AbstractUnnestMapOperator unnestMap, IOperatorSchema opSchema, boolean retainInput, boolean retainMissing,
             String datasetName, Dataset dataset, String indexName, ATypeTag searchKeyType, int[] keyFields,
             SearchModifierType searchModifierType, IAlgebricksConstantValue similarityThreshold,
-            int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes, boolean isFullTextSearchQuery)
-            throws AlgebricksException {
+            boolean propagateIndexFilter, int[] minFilterFieldIndexes, int[] maxFilterFieldIndexes,
+            boolean isFullTextSearchQuery) throws AlgebricksException {
         try {
             IAObject simThresh = ((AsterixConstantValue) similarityThreshold).getObject();
             IAType itemType = MetadataManager.INSTANCE.getDatatype(metadataProvider.getMetadataTxnContext(),
@@ -260,7 +262,7 @@ public class InvertedIndexPOperator extends IndexSearchPOperator {
                     dataset.getSearchCallbackFactory(metadataProvider.getStorageComponentProvider(), secondaryIndex,
                             ((JobEventListenerFactory) jobSpec.getJobletEventListenerFactory()).getJobId(),
                             IndexOperation.SEARCH, null),
-                    minFilterFieldIndexes, maxFilterFieldIndexes,
+                    propagateIndexFilter, minFilterFieldIndexes, maxFilterFieldIndexes,
                     metadataProvider.getStorageComponentProvider().getMetadataPageManagerFactory(),
                     isFullTextSearchQuery);
             return new Pair<>(invIndexSearchOp, secondarySplitsAndConstraint.second);
