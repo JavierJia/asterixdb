@@ -251,22 +251,20 @@ public class IntroduceLSMComponentFilterRule implements IAlgebraicRewriteRule {
 
             switch (intersectOrSort.getValue().getOperatorTag()) {
                 case INTERSECT:
+                    for (Mutable<ILogicalOperator> mutableOp : intersectOrSort.getValue().getInputs()) {
+                        ILogicalOperator child = mutableOp.getValue();
+                        if (child.getOperatorTag().equals(LogicalOperatorTag.UNNEST_MAP)) {
+                            indeedSecondaryToPrimaryPath = true;
+                            propagateFilterInSecondaryUnnest((UnnestMapOperator) child, filterType, context);
+                        }
+
+                    }
                     break;
                 case ORDER:
                     ILogicalOperator child = intersectOrSort.getValue().getInputs().get(0).getValue();
                     if (child.getOperatorTag().equals(LogicalOperatorTag.UNNEST_MAP)) {
-                        UnnestMapOperator secondaryUnnest = (UnnestMapOperator) child;
                         indeedSecondaryToPrimaryPath = true;
-
-                        LogicalVariable minIndexFilterVar = context.newVar();
-                        LogicalVariable maxIndexFilterVar = context.newVar();
-                        secondaryUnnest.setPropagateIndexFilter(true);
-                        secondaryUnnest.getVariables().add(minIndexFilterVar);
-                        secondaryUnnest.getVariableTypes().add(filterType);
-                        secondaryUnnest.getVariables().add(maxIndexFilterVar);
-                        secondaryUnnest.getVariableTypes().add(filterType);
-
-                        context.computeAndSetTypeEnvironmentForOperator(secondaryUnnest);
+                        propagateFilterInSecondaryUnnest((UnnestMapOperator) child, filterType, context);
                     }
                     break;
                 default:
@@ -290,6 +288,20 @@ public class IntroduceLSMComponentFilterRule implements IAlgebraicRewriteRule {
                 context.computeAndSetTypeEnvironmentForOperator(primaryOp);
             }
         }
+    }
+
+    private void propagateFilterInSecondaryUnnest(UnnestMapOperator secondaryUnnest, IAType filterType,
+            IOptimizationContext context) throws AlgebricksException {
+
+        LogicalVariable minIndexFilterVar = context.newVar();
+        LogicalVariable maxIndexFilterVar = context.newVar();
+        secondaryUnnest.setPropagateIndexFilter(true);
+        secondaryUnnest.getVariables().add(minIndexFilterVar);
+        secondaryUnnest.getVariableTypes().add(filterType);
+        secondaryUnnest.getVariables().add(maxIndexFilterVar);
+        secondaryUnnest.getVariableTypes().add(filterType);
+
+        context.computeAndSetTypeEnvironmentForOperator(secondaryUnnest);
     }
 
     private Dataset getDataset(AbstractLogicalOperator op, IOptimizationContext context) throws AlgebricksException {
