@@ -61,10 +61,6 @@ public class UnnestMapOperator extends AbstractUnnestMapOperator {
         for (int i = 0; i < n; i++) {
             env.setVarType(variables.get(i), variableTypes.get(i));
         }
-        if (propagateIndexFilter) {
-            env.setVarType(minIndexFilterVar, indexFilterType);
-            env.setVarType(maxIndexFilterVar, indexFilterType);
-        }
         return env;
     }
 

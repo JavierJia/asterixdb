@@ -261,8 +261,10 @@ public class IntroduceLSMComponentFilterRule implements IAlgebraicRewriteRule {
                         LogicalVariable minIndexFilterVar = context.newVar();
                         LogicalVariable maxIndexFilterVar = context.newVar();
                         secondaryUnnest.setPropagateIndexFilter(true);
-                        secondaryUnnest.setPropagateFilterVars(minIndexFilterVar, maxIndexFilterVar);
-                        secondaryUnnest.setIndexFilterType(filterType);
+                        secondaryUnnest.getVariables().add(minIndexFilterVar);
+                        secondaryUnnest.getVariableTypes().add(filterType);
+                        secondaryUnnest.getVariables().add(maxIndexFilterVar);
+                        secondaryUnnest.getVariableTypes().add(filterType);
 
                         context.computeAndSetTypeEnvironmentForOperator(secondaryUnnest);
                     }
@@ -285,7 +287,6 @@ public class IntroduceLSMComponentFilterRule implements IAlgebraicRewriteRule {
                                 new VariableReferenceExpression(secondaryMap.getPropagateIndexMaxFilterVar()))));
 
                 primaryOp.setAdditionalFilteringExpressions(indexFilterExpression);
-                primaryOp.getInputs().set(0, intersectOrSort);
                 context.computeAndSetTypeEnvironmentForOperator(primaryOp);
             }
         }

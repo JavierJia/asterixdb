@@ -36,9 +36,6 @@ public abstract class AbstractUnnestMapOperator extends AbstractUnnestOperator {
     protected List<LogicalVariable> maxFilterVars;
 
     protected boolean propagateIndexFilter;
-    protected LogicalVariable maxIndexFilterVar;
-    protected LogicalVariable minIndexFilterVar;
-    protected Object indexFilterType; // min & max filter share the same type.
 
     public AbstractUnnestMapOperator(List<LogicalVariable> variables, Mutable<ILogicalExpression> expression,
             List<Object> variableTypes, boolean propagateInput) {
@@ -47,6 +44,15 @@ public abstract class AbstractUnnestMapOperator extends AbstractUnnestOperator {
         this.variableTypes = variableTypes;
         this.propagateInput = propagateInput;
         this.propagateIndexFilter = false;
+    }
+
+    @Override
+    public List<LogicalVariable> getScanVariables() {
+        if (propagateIndexFilter) {
+            return variables.subList(0, variables.size() - 2);
+        } else {
+            return variables;
+        }
     }
 
     public List<Object> getVariableTypes() {
@@ -67,10 +73,6 @@ public abstract class AbstractUnnestMapOperator extends AbstractUnnestOperator {
                 }
                 for (LogicalVariable v : variables) {
                     target.addVariable(v);
-                }
-                if (propagateIndexFilter) {
-                    target.addVariable(minIndexFilterVar);
-                    target.addVariable(maxIndexFilterVar);
                 }
             }
         };
@@ -116,20 +118,19 @@ public abstract class AbstractUnnestMapOperator extends AbstractUnnestOperator {
         return this.propagateIndexFilter;
     }
 
-    public void setPropagateFilterVars(LogicalVariable minIndexFilterVars, LogicalVariable maxIndexFilterVars) {
-        this.minIndexFilterVar = minIndexFilterVars;
-        this.maxIndexFilterVar = maxIndexFilterVars;
-    }
-
     public LogicalVariable getPropagateIndexMinFilterVar() {
-        return minIndexFilterVar;
+        if (propagateIndexFilter) {
+            return variables.get(variables.size() - 2);
+        } else {
+            return null;
+        }
     }
 
     public LogicalVariable getPropagateIndexMaxFilterVar() {
-        return maxIndexFilterVar;
-    }
-
-    public void setIndexFilterType(Object type) {
-        this.indexFilterType = type;
+        if (propagateIndexFilter) {
+            return variables.get(variables.size() - 1);
+        } else {
+            return null;
+        }
     }
 }
