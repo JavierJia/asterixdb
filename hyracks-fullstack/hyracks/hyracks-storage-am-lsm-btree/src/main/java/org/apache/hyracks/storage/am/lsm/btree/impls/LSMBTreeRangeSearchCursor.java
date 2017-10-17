@@ -74,15 +74,15 @@ public class LSMBTreeRangeSearchCursor extends LSMIndexSearchCursor {
         outputElement = outputPriorityQueue.poll();
         needPushElementIntoQueue = true;
         canCallProceed = false;
-        IndexSearchOperatorNodePushable.BTreeRangeSearchTime += System.nanoTime() - now;
+        IndexSearchOperatorNodePushable.BTreeRangeSearchTime.getAndAdd(System.nanoTime() - now);
     }
 
     @Override
     public boolean hasNext() throws HyracksDataException {
-        IndexSearchOperatorNodePushable.BTreeRangeSearchCount++;
+        IndexSearchOperatorNodePushable.BTreeRangeSearchCount.getAndIncrement();
         long now = System.nanoTime();
         boolean ret = super.hasNext();
-        IndexSearchOperatorNodePushable.BTreeRangeSearchTime += System.nanoTime() - now;
+        IndexSearchOperatorNodePushable.BTreeRangeSearchTime.getAndAdd(System.nanoTime() - now);
         return ret;
     }
 

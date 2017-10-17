@@ -150,7 +150,7 @@ public class LSMInvertedIndexSearchCursor implements IIndexCursor {
         }
         while (accessorIndex < indexAccessors.size()) {
             // Current cursor has been exhausted, switch to next accessor/cursor.
-            IndexSearchOperatorNodePushable.InvertSearchCount++;
+            IndexSearchOperatorNodePushable.InvertSearchCount.getAndIncrement();
             currentAccessor = indexAccessors.get(accessorIndex);
             currentCursor = currentAccessor.createSearchCursor(false);
             currentAccessor.search(currentCursor, searchPred);
@@ -165,7 +165,7 @@ public class LSMInvertedIndexSearchCursor implements IIndexCursor {
     }
 
     private boolean logAndReturn(boolean value, long since) {
-        IndexSearchOperatorNodePushable.InvertSearchTime += System.nanoTime() - since;
+        IndexSearchOperatorNodePushable.InvertSearchTime.getAndAdd(System.nanoTime() - since);
         return value;
     }
 

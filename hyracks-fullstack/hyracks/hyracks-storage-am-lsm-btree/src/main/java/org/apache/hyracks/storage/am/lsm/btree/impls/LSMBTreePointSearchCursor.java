@@ -79,11 +79,11 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
 
         long now0 = System.nanoTime();
         for (int i = 0; i < numBTrees; ++i) {
-            IndexSearchOperatorNodePushable.BloomFilterCount++;
+            IndexSearchOperatorNodePushable.BloomFilterCount.getAndIncrement();
             if (!checkBloomFilter(bloomFilters[i], predicate.getLowKey(), predicate)) {
                 continue;
             }
-            IndexSearchOperatorNodePushable.BTreePointSearchCount++;
+            IndexSearchOperatorNodePushable.BTreePointSearchCount.getAndIncrement();
             long now = System.nanoTime();
             btreeAccessors[i].search(rangeCursors[i], predicate);
             if (rangeCursors[i].hasNext()) {
@@ -146,7 +146,7 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
     }
 
     private boolean logReturn(boolean value, long since){
-        IndexSearchOperatorNodePushable.BTreePointSearchTime += System.nanoTime() - since;
+        IndexSearchOperatorNodePushable.BTreePointSearchTime.getAndAdd(System.nanoTime() - since);
         return value;
     }
 
@@ -177,7 +177,7 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
         } else {
             ret = bloomFilter.contains(tuple, hashes);
         }
-        IndexSearchOperatorNodePushable.BloomFilterTime += System.nanoTime() - start;
+        IndexSearchOperatorNodePushable.BloomFilterTime.getAndAdd(System.nanoTime() - start);
         return ret;
     }
 

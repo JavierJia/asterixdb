@@ -21,6 +21,8 @@ package org.apache.hyracks.storage.am.common.dataflow;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -126,15 +128,15 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
     protected abstract int getFieldCount();
 
     private long start;
-    public static int BTreeRangeSearchCount = 0;
-    public static int InvertSearchCount = 0;
-    public static int BloomFilterCount = 0;
-    public static int BTreePointSearchCount = 0;
+    public static AtomicInteger BTreeRangeSearchCount = new AtomicInteger(0);
+    public static AtomicInteger InvertSearchCount = new AtomicInteger(0);
+    public static AtomicInteger BloomFilterCount = new AtomicInteger(0);
+    public static AtomicInteger BTreePointSearchCount = new AtomicInteger(0);
 
-    public static long BTreeRangeSearchTime = 0;
-    public static long InvertSearchTime = 0;
-    public static long BloomFilterTime = 0;
-    public static long BTreePointSearchTime = 0;
+    public static AtomicLong BTreeRangeSearchTime = new AtomicLong(0);
+    public static AtomicLong InvertSearchTime = new AtomicLong(0);
+    public static AtomicLong BloomFilterTime = new AtomicLong(0);
+    public static AtomicLong BTreePointSearchTime = new AtomicLong(0);
 
     @Override
     public void open() throws HyracksDataException {
@@ -228,30 +230,30 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         StringBuilder sb = new StringBuilder();
         sb.append("\n")
                 .append(this.getClass().getSimpleName() + ",time," + (System.nanoTime() - start)).append("\n");
-        sb.append("BTreeRangeSearchCount,").append(BTreeRangeSearchCount)
-                .append(",BTreeRangeSearchTime,").append(BTreeRangeSearchTime).append("\n");
-        sb.append("InvertSearchCount,").append(InvertSearchCount)
-                .append(",InvertSearchTime,").append(InvertSearchTime).append("\n");
-        sb.append("BloomFilterCount,").append(BloomFilterCount)
-                .append(",BloomFilterTime,").append(BloomFilterTime).append("\n");
-        sb.append("BTreePointSearchCount,").append(BTreePointSearchCount)
-                .append(",BTreePointSearchTime,").append(BTreePointSearchTime).append("\n");
-        sb.append("BufferCacheTotalPage,").append(BufferCache.totalPageCount)
-                .append(",BufferCacheCached,").append(BufferCache.cachedPageCount).append("\n");
+        sb.append("BTreeRangeSearchCount,").append(BTreeRangeSearchCount.get())
+                .append(",BTreeRangeSearchTime,").append(BTreeRangeSearchTime.get()).append("\n");
+        sb.append("InvertSearchCount,").append(InvertSearchCount.get())
+                .append(",InvertSearchTime,").append(InvertSearchTime.get()).append("\n");
+        sb.append("BloomFilterCount,").append(BloomFilterCount.get())
+                .append(",BloomFilterTime,").append(BloomFilterTime.get()).append("\n");
+        sb.append("BTreePointSearchCount,").append(BTreePointSearchCount.get())
+                .append(",BTreePointSearchTime,").append(BTreePointSearchTime.get()).append("\n");
+        sb.append("BufferCacheTotalPage,").append(BufferCache.totalPageCount.get())
+                .append(",BufferCacheCached,").append(BufferCache.cachedPageCount.get()).append("\n");
         LOGGER.warning(sb.toString());
     }
 
     private void clearStats() {
         start = 0;
-        BTreeRangeSearchCount = 0;
-        InvertSearchCount = 0;
-        BloomFilterCount = 0;
-        BTreePointSearchCount = 0;
+        BTreeRangeSearchCount.set(0);
+        InvertSearchCount.set(0);
+        BloomFilterCount.set(0);
+        BTreePointSearchCount.set(0);
 
-        BTreeRangeSearchTime = 0;
-        InvertSearchTime = 0;
-        BloomFilterTime = 0;
-        BTreePointSearchTime = 0;
+        BTreeRangeSearchTime.set(0);
+        InvertSearchTime.set(0);
+        BloomFilterTime.set(0);
+        BTreePointSearchTime.set(0);
 
         BufferCache.clearStats();
     }

@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -88,12 +89,12 @@ public class BufferCache implements IBufferCacheInternal, ILifeCycleComponent {
 
     private boolean closed;
 
-    public static int totalPageCount = 0;
-    public static int cachedPageCount = 0;
+    public static AtomicInteger totalPageCount = new AtomicInteger(0);
+    public static AtomicInteger cachedPageCount = new AtomicInteger(0);
 
     public static void clearStats() {
-        totalPageCount = 0;
-        cachedPageCount = 0;
+        totalPageCount.set(0);
+        cachedPageCount.set(0);
     }
 
     public BufferCache(IIOManager ioManager, IPageReplacementStrategy pageReplacementStrategy,
@@ -202,7 +203,7 @@ public class BufferCache implements IBufferCacheInternal, ILifeCycleComponent {
         if (DEBUG) {
             pinSanityCheck(dpid);
         }
-        totalPageCount++;
+        totalPageCount.getAndIncrement();
         CachedPage cPage = findPage(dpid);
         if (!newPage) {
             if (DEBUG) {
@@ -224,7 +225,7 @@ public class BufferCache implements IBufferCacheInternal, ILifeCycleComponent {
                     tryRead(cPage);
                     cPage.valid = true;
                 } else {
-                    cachedPageCount++;
+                    cachedPageCount.getAndIncrement();
                 }
             }
         } else {
