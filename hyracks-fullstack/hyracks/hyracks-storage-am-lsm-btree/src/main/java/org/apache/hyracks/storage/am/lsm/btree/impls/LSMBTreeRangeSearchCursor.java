@@ -31,6 +31,7 @@ import org.apache.hyracks.storage.am.btree.impls.BTree;
 import org.apache.hyracks.storage.am.btree.impls.BTree.BTreeAccessor;
 import org.apache.hyracks.storage.am.btree.impls.BTreeRangeSearchCursor;
 import org.apache.hyracks.storage.am.btree.impls.RangePredicate;
+import org.apache.hyracks.storage.am.common.dataflow.IndexSearchOperatorNodePushable;
 import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallback;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMComponent;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMComponent.LSMComponentType;
@@ -69,9 +70,20 @@ public class LSMBTreeRangeSearchCursor extends LSMIndexSearchCursor {
 
     @Override
     public void next() throws HyracksDataException {
+        long now = System.nanoTime();
         outputElement = outputPriorityQueue.poll();
         needPushElementIntoQueue = true;
         canCallProceed = false;
+        IndexSearchOperatorNodePushable.BTreeRangeSearchTime += System.nanoTime() - now;
+    }
+
+    @Override
+    public boolean hasNext() throws HyracksDataException {
+        IndexSearchOperatorNodePushable.BTreeRangeSearchCount++;
+        long now = System.nanoTime();
+        boolean ret = super.hasNext();
+        IndexSearchOperatorNodePushable.BTreeRangeSearchTime += System.nanoTime() - now;
+        return ret;
     }
 
     /**

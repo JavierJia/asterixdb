@@ -24,6 +24,7 @@ import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.btree.api.IBTreeLeafFrame;
 import org.apache.hyracks.storage.am.btree.impls.RangePredicate;
+import org.apache.hyracks.storage.am.common.dataflow.IndexSearchOperatorNodePushable;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMComponent;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMComponent.LSMComponentType;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMComponentFilter;
@@ -136,29 +137,36 @@ public class LSMInvertedIndexSearchCursor implements IIndexCursor {
 
     @Override
     public boolean hasNext() throws HyracksDataException {
+        long now = System.nanoTime();
         if (!tupleConsumed) {
-            return true;
+            return logAndReturn(true, now);
         }
         if (currentCursor != null) {
             if (nextValidTuple()) {
-                return true;
+                return logAndReturn(true, now);
             }
             currentCursor.close();
             accessorIndex++;
         }
         while (accessorIndex < indexAccessors.size()) {
             // Current cursor has been exhausted, switch to next accessor/cursor.
+            IndexSearchOperatorNodePushable.InvertSearchCount++;
             currentAccessor = indexAccessors.get(accessorIndex);
             currentCursor = currentAccessor.createSearchCursor(false);
             currentAccessor.search(currentCursor, searchPred);
             if (nextValidTuple()) {
-                return true;
+                return logAndReturn(true, now);
             }
             // Close as we go to release resources.
             currentCursor.close();
             accessorIndex++;
         }
-        return false;
+        return logAndReturn(false, now);
+    }
+
+    private boolean logAndReturn(boolean value, long since) {
+        IndexSearchOperatorNodePushable.InvertSearchTime += System.nanoTime() - since;
+        return value;
     }
 
     @Override

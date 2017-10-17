@@ -20,7 +20,9 @@
 package org.apache.hyracks.storage.am.lsm.btree.impls;
 
 import java.util.List;
+import java.util.logging.Logger;
 
+import com.sun.corba.se.impl.protocol.INSServerRequestDispatcher;
 import org.apache.hyracks.api.exceptions.HyracksDataException;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
 import org.apache.hyracks.storage.am.bloomfilter.impls.BloomFilter;
@@ -30,6 +32,7 @@ import org.apache.hyracks.storage.am.btree.impls.BTree.BTreeAccessor;
 import org.apache.hyracks.storage.am.btree.impls.BTreeRangeSearchCursor;
 import org.apache.hyracks.storage.am.btree.impls.RangePredicate;
 import org.apache.hyracks.storage.am.common.api.ITreeIndexCursor;
+import org.apache.hyracks.storage.am.common.dataflow.IndexSearchOperatorNodePushable;
 import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallback;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMComponent;
 import org.apache.hyracks.storage.am.lsm.common.api.ILSMComponent.LSMComponentType;
@@ -73,10 +76,15 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
             return true;
         }
         boolean reconciled = false;
+
+        long now0 = System.nanoTime();
         for (int i = 0; i < numBTrees; ++i) {
+            IndexSearchOperatorNodePushable.BloomFilterCount++;
             if (!checkBloomFilter(bloomFilters[i], predicate.getLowKey(), predicate)) {
                 continue;
             }
+            IndexSearchOperatorNodePushable.BTreePointSearchCount++;
+            long now = System.nanoTime();
             btreeAccessors[i].search(rangeCursors[i], predicate);
             if (rangeCursors[i].hasNext()) {
                 rangeCursors[i].next();
@@ -89,12 +97,12 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
                             searchCallback.cancel(predicate.getLowKey());
                         }
                         rangeCursors[i].close();
-                        return false;
+                        return logReturn(false,now);
                     } else {
                         frameTuple = rangeCursors[i].getTuple();
                         foundTuple = true;
                         foundIn = i;
-                        return true;
+                        return logReturn(true,now);
                     }
                 }
                 if (i == 0 && includeMutableComponent) {
@@ -110,13 +118,13 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
                         if (((ILSMTreeTupleReference) rangeCursors[i].getTuple()).isAntimatter()) {
                             searchCallback.cancel(predicate.getLowKey());
                             rangeCursors[i].close();
-                            return false;
+                            return logReturn(false,now);
                         } else {
                             frameTuple = rangeCursors[i].getTuple();
                             foundTuple = true;
                             searchCallback.complete(predicate.getLowKey());
                             foundIn = i;
-                            return true;
+                            return logReturn(true,now);
                         }
                     } else {
                         searchCallback.cancel(predicate.getLowKey());
@@ -128,13 +136,18 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
                     searchCallback.complete(frameTuple);
                     foundTuple = true;
                     foundIn = i;
-                    return true;
+                    return logReturn(true,now);
                 }
             } else {
                 rangeCursors[i].close();
             }
         }
-        return false;
+        return logReturn(false,now0);
+    }
+
+    private boolean logReturn(boolean value, long since){
+        IndexSearchOperatorNodePushable.BTreePointSearchTime += System.nanoTime() - since;
+        return value;
     }
 
     @Override
@@ -157,11 +170,15 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
 
     private boolean checkBloomFilter(BloomFilter bloomFilter, ITupleReference tuple, RangePredicate pred)
             throws HyracksDataException {
+        long start = System.nanoTime();
+        boolean ret;
         if (bloomFilter == null || operationalComponents.size() == 1) {
-            return true;
+            ret = true;
         } else {
-            return bloomFilter.contains(tuple, hashes);
+            ret = bloomFilter.contains(tuple, hashes);
         }
+        IndexSearchOperatorNodePushable.BloomFilterTime += System.nanoTime() - start;
+        return ret;
     }
 
     @Override

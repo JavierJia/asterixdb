@@ -48,6 +48,7 @@ import org.apache.hyracks.storage.common.IIndexAccessor;
 import org.apache.hyracks.storage.common.IIndexCursor;
 import org.apache.hyracks.storage.common.ISearchOperationCallback;
 import org.apache.hyracks.storage.common.ISearchPredicate;
+import org.apache.hyracks.storage.common.buffercache.BufferCache;
 
 public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInputUnaryOutputOperatorNodePushable {
 
@@ -124,12 +125,24 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
 
     protected abstract int getFieldCount();
 
+    private long start;
+    public static int BTreeRangeSearchCount = 0;
+    public static int InvertSearchCount = 0;
+    public static int BloomFilterCount = 0;
+    public static int BTreePointSearchCount = 0;
+
+    public static long BTreeRangeSearchTime = 0;
+    public static long InvertSearchTime = 0;
+    public static long BloomFilterTime = 0;
+    public static long BTreePointSearchTime = 0;
+
     @Override
     public void open() throws HyracksDataException {
         writer.open();
         indexHelper.open();
         index = indexHelper.getIndexInstance();
         accessor = new FrameTupleAccessor(inputRecDesc);
+        start = System.nanoTime();
         if (retainMissing) {
             int fieldCount = getFieldCount();
             nonMatchTupleBuild = new ArrayTupleBuilder(fieldCount);
@@ -211,9 +224,45 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         appender.flush(writer);
     }
 
+    private void printStats() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n")
+                .append(this.getClass().getSimpleName() + ",time," + (System.nanoTime() - start)).append("\n");
+        sb.append("BTreeRangeSearchCount,").append(BTreeRangeSearchCount)
+                .append(",BTreeRangeSearchTime,").append(BTreeRangeSearchTime).append("\n");
+        sb.append("InvertSearchCount,").append(InvertSearchCount)
+                .append(",InvertSearchTime,").append(InvertSearchTime).append("\n");
+        sb.append("BloomFilterCount,").append(BloomFilterCount)
+                .append(",BloomFilterTime,").append(BloomFilterTime).append("\n");
+        sb.append("BTreePointSearchCount,").append(BTreePointSearchCount)
+                .append(",BTreePointSearchTime,").append(BTreePointSearchTime).append("\n");
+        sb.append("BufferCacheTotalPage,").append(BufferCache.totalPageCount)
+                .append(",BufferCacheCached,").append(BufferCache.cachedPageCount).append("\n");
+        LOGGER.warning(sb.toString());
+    }
+
+    private void clearStats() {
+        start = 0;
+        BTreeRangeSearchCount = 0;
+        InvertSearchCount = 0;
+        BloomFilterCount = 0;
+        BTreePointSearchCount = 0;
+
+        BTreeRangeSearchTime = 0;
+        InvertSearchTime = 0;
+        BloomFilterTime = 0;
+        BTreePointSearchTime = 0;
+
+        BufferCache.clearStats();
+    }
+
     @Override
     public void close() throws HyracksDataException {
         HyracksDataException closeException = null;
+
+        printStats();
+        clearStats();
+
         if (index != null) {
             // if index == null, then the index open was not successful
             if (!failed) {

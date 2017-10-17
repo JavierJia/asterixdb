@@ -88,6 +88,14 @@ public class BufferCache implements IBufferCacheInternal, ILifeCycleComponent {
 
     private boolean closed;
 
+    public static int totalPageCount = 0;
+    public static int cachedPageCount = 0;
+
+    public static void clearStats() {
+        totalPageCount = 0;
+        cachedPageCount = 0;
+    }
+
     public BufferCache(IIOManager ioManager, IPageReplacementStrategy pageReplacementStrategy,
             IPageCleanerPolicy pageCleanerPolicy, IFileMapManager fileMapManager, int maxOpenFiles,
             ThreadFactory threadFactory) {
@@ -194,6 +202,7 @@ public class BufferCache implements IBufferCacheInternal, ILifeCycleComponent {
         if (DEBUG) {
             pinSanityCheck(dpid);
         }
+        totalPageCount++;
         CachedPage cPage = findPage(dpid);
         if (!newPage) {
             if (DEBUG) {
@@ -214,6 +223,8 @@ public class BufferCache implements IBufferCacheInternal, ILifeCycleComponent {
                 if (!cPage.valid) {
                     tryRead(cPage);
                     cPage.valid = true;
+                } else {
+                    cachedPageCount++;
                 }
             }
         } else {
