@@ -91,10 +91,12 @@ public class BufferCache implements IBufferCacheInternal, ILifeCycleComponent {
 
     public static AtomicInteger totalPageCount = new AtomicInteger(0);
     public static AtomicInteger cachedPageCount = new AtomicInteger(0);
+    public static AtomicInteger readPageCount = new AtomicInteger(0);
 
     public static void clearStats() {
         totalPageCount.set(0);
         cachedPageCount.set(0);
+        readPageCount.set(0);
     }
 
     public BufferCache(IIOManager ioManager, IPageReplacementStrategy pageReplacementStrategy,
@@ -224,6 +226,7 @@ public class BufferCache implements IBufferCacheInternal, ILifeCycleComponent {
                 if (!cPage.valid) {
                     tryRead(cPage);
                     cPage.valid = true;
+                    readPageCount.getAndIncrement();
                 } else {
                     cachedPageCount.getAndIncrement();
                 }

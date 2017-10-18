@@ -86,6 +86,8 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
             IndexSearchOperatorNodePushable.BTreePointSearchCount.getAndIncrement();
             long now = System.nanoTime();
             btreeAccessors[i].search(rangeCursors[i], predicate);
+            IndexSearchOperatorNodePushable.BTreePointSearchPathTime.getAndAdd(System.nanoTime()-now);
+            now = System.nanoTime();
             if (rangeCursors[i].hasNext()) {
                 rangeCursors[i].next();
                 // We use the predicate's to lock the key instead of the tuple that we get from cursor
@@ -142,11 +144,16 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
                 rangeCursors[i].close();
             }
         }
-        return logReturn(false,now0);
+        IndexSearchOperatorNodePushable.BTreePointSearchNOPETime.getAndAdd(System.nanoTime() - now0);
+        return false;
     }
 
     private boolean logReturn(boolean value, long since){
-        IndexSearchOperatorNodePushable.BTreePointSearchTime.getAndAdd(System.nanoTime() - since);
+        if (value) {
+            IndexSearchOperatorNodePushable.BTreePointSearchLeafTrueTime.getAndAdd(System.nanoTime() - since);
+        } else {
+            IndexSearchOperatorNodePushable.BTreePointSearchLeafFalseTime.getAndAdd(System.nanoTime() - since);
+        }
         return value;
     }
 

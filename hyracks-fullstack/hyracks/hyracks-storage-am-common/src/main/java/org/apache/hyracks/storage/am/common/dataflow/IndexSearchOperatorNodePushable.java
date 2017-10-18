@@ -136,7 +136,10 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
     public static AtomicLong BTreeRangeSearchTime = new AtomicLong(0);
     public static AtomicLong InvertSearchTime = new AtomicLong(0);
     public static AtomicLong BloomFilterTime = new AtomicLong(0);
-    public static AtomicLong BTreePointSearchTime = new AtomicLong(0);
+    public static AtomicLong BTreePointSearchPathTime = new AtomicLong(0);
+    public static AtomicLong BTreePointSearchLeafTrueTime = new AtomicLong(0);
+    public static AtomicLong BTreePointSearchLeafFalseTime = new AtomicLong(0);
+    public static AtomicLong BTreePointSearchNOPETime = new AtomicLong(0);
 
     @Override
     public void open() throws HyracksDataException {
@@ -237,9 +240,15 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         sb.append("BloomFilterCount,").append(BloomFilterCount.get())
                 .append(",BloomFilterTime,").append(BloomFilterTime.get()).append("\n");
         sb.append("BTreePointSearchCount,").append(BTreePointSearchCount.get())
-                .append(",BTreePointSearchTime,").append(BTreePointSearchTime.get()).append("\n");
+                .append(",BTreePointSearchTimePathTime,").append(BTreePointSearchPathTime.get())
+                .append(",BTreePointSearchTimeLeafTrueTime,").append(BTreePointSearchLeafTrueTime.get())
+                .append(",BTreePointSearchTimeLeafFalseTime,").append(BTreePointSearchLeafFalseTime.get())
+                .append(",BTreePointSearchTimeNOPETime,").append(BTreePointSearchNOPETime.get())
+                .append("\n");
         sb.append("BufferCacheTotalPage,").append(BufferCache.totalPageCount.get())
-                .append(",BufferCacheCached,").append(BufferCache.cachedPageCount.get()).append("\n");
+                .append(",BufferCacheCached,").append(BufferCache.cachedPageCount.get())
+                .append(",BufferCacheRead,").append(BufferCache.readPageCount.get())
+                .append("\n");
         LOGGER.warning(sb.toString());
     }
 
@@ -253,7 +262,11 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         BTreeRangeSearchTime.set(0);
         InvertSearchTime.set(0);
         BloomFilterTime.set(0);
-        BTreePointSearchTime.set(0);
+
+        BTreePointSearchPathTime.set(0);
+        BTreePointSearchLeafTrueTime.set(0);
+        BTreePointSearchLeafFalseTime.set(0);
+        BTreePointSearchNOPETime.set(0);
 
         BufferCache.clearStats();
     }
