@@ -141,6 +141,8 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
     public static AtomicLong BTreePointSearchLeafFalseTime = new AtomicLong(0);
     public static AtomicLong BTreePointSearchNOPETime = new AtomicLong(0);
 
+    public static AtomicLong IndexSearchTime = new AtomicLong(0);
+
     @Override
     public void open() throws HyracksDataException {
         writer.open();
@@ -210,6 +212,7 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
 
     @Override
     public void nextFrame(ByteBuffer buffer) throws HyracksDataException {
+        long now = System.nanoTime();
         accessor.reset(buffer);
         int tupleCount = accessor.getTupleCount();
         try {
@@ -222,6 +225,7 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         } catch (Exception e) {
             throw HyracksDataException.create(e);
         }
+        IndexSearchTime.getAndAdd(System.nanoTime() - now);
     }
 
     @Override
@@ -233,6 +237,7 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         StringBuilder sb = new StringBuilder();
         sb.append("\n")
                 .append(this.getClass().getSimpleName() + ",time," + (System.nanoTime() - start)).append("\n");
+        sb.append("IndexSearchTime,").append(IndexSearchTime.get()).append("\n");
         sb.append("BTreeRangeSearchCount,").append(BTreeRangeSearchCount.get())
                 .append(",BTreeRangeSearchTime,").append(BTreeRangeSearchTime.get()).append("\n");
         sb.append("InvertSearchCount,").append(InvertSearchCount.get())
@@ -267,6 +272,8 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         BTreePointSearchLeafTrueTime.set(0);
         BTreePointSearchLeafFalseTime.set(0);
         BTreePointSearchNOPETime.set(0);
+
+        IndexSearchTime.set(0);
 
         BufferCache.clearStats();
     }
