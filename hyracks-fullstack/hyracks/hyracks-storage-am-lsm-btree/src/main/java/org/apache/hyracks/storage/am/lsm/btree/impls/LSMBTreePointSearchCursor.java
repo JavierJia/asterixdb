@@ -190,12 +190,15 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
 
     @Override
     public void open(ICursorInitialState initialState, ISearchPredicate searchPred) throws HyracksDataException {
+        IndexSearchOperatorNodePushable.CursorOpenCount.incrementAndGet();
+        long now  = System.nanoTime();
         LSMBTreeCursorInitialState lsmInitialState = (LSMBTreeCursorInitialState) initialState;
         operationalComponents = lsmInitialState.getOperationalComponents();
         lsmHarness = lsmInitialState.getLSMHarness();
         searchCallback = lsmInitialState.getSearchOperationCallback();
         predicate = (RangePredicate) lsmInitialState.getSearchPredicate();
         numBTrees = operationalComponents.size();
+        IndexSearchOperatorNodePushable.NumBTrees.getAndAdd(numBTrees);
         if (rangeCursors == null || rangeCursors.length != numBTrees) {
             // object creation: should be relatively low
             rangeCursors = new BTreeRangeSearchCursor[numBTrees];
@@ -245,6 +248,7 @@ public class LSMBTreePointSearchCursor implements ITreeIndexCursor {
         }
         nextHasBeenCalled = false;
         foundTuple = false;
+        IndexSearchOperatorNodePushable.CursorOpenTime.getAndAdd(System.nanoTime() - now);
     }
 
     @Override

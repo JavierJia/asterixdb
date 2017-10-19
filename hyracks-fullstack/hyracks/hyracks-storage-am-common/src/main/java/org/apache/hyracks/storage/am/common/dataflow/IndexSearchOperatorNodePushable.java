@@ -142,6 +142,15 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
     public static AtomicLong BTreePointSearchNOPETime = new AtomicLong(0);
 
     public static AtomicLong IndexSearchTime = new AtomicLong(0);
+    public static AtomicInteger FilterCheckCount = new AtomicInteger(0);
+    public static AtomicLong FilterCheckTime = new AtomicLong(0);
+    public static AtomicLong WriteResultTime = new AtomicLong(0);
+    public static AtomicLong ResetCurSorTime = new AtomicLong(0);
+    public static AtomicLong InitialAccessorTime = new AtomicLong(0);
+
+    public static AtomicLong CursorOpenCount = new AtomicLong(0);
+    public static AtomicLong CursorOpenTime = new AtomicLong(0);
+    public static AtomicLong NumBTrees = new AtomicLong(0);
 
     @Override
     public void open() throws HyracksDataException {
@@ -217,10 +226,18 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         int tupleCount = accessor.getTupleCount();
         try {
             for (int i = 0; i < tupleCount; i++) {
+                long n = System.nanoTime();
                 resetSearchPredicate(i);
                 cursor.reset();
+                ResetCurSorTime.getAndAdd(System.nanoTime() - n);
+
+                n = System.nanoTime();
                 indexAccessor.search(cursor, searchPred);
+                InitialAccessorTime.getAndAdd(System.nanoTime() - n);
+
+                n = System.nanoTime();
                 writeSearchResults(i);
+                WriteResultTime.getAndAdd(System.nanoTime() - n);
             }
         } catch (Exception e) {
             throw HyracksDataException.create(e);
@@ -235,25 +252,36 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
 
     private void printStats() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\n")
-                .append(this.getClass().getSimpleName() + ",time," + (System.nanoTime() - start)).append("\n");
+        sb.append("\n").append(this.getClass().getSimpleName() + ",time," + (System.nanoTime() - start)).append("\n");
         sb.append("IndexSearchTime,").append(IndexSearchTime.get()).append("\n");
-        sb.append("BTreeRangeSearchCount,").append(BTreeRangeSearchCount.get())
-                .append(",BTreeRangeSearchTime,").append(BTreeRangeSearchTime.get()).append("\n");
-        sb.append("InvertSearchCount,").append(InvertSearchCount.get())
-                .append(",InvertSearchTime,").append(InvertSearchTime.get()).append("\n");
-        sb.append("BloomFilterCount,").append(BloomFilterCount.get())
-                .append(",BloomFilterTime,").append(BloomFilterTime.get()).append("\n");
-        sb.append("BTreePointSearchCount,").append(BTreePointSearchCount.get())
-                .append(",BTreePointSearchTimePathTime,").append(BTreePointSearchPathTime.get())
-                .append(",BTreePointSearchTimeLeafTrueTime,").append(BTreePointSearchLeafTrueTime.get())
-                .append(",BTreePointSearchTimeLeafFalseTime,").append(BTreePointSearchLeafFalseTime.get())
-                .append(",BTreePointSearchTimeNOPETime,").append(BTreePointSearchNOPETime.get())
+
+        sb.append("ResetTime,").append(ResetCurSorTime.get())
+                .append(",InitialAccessorTime,").append(InitialAccessorTime.get())
+                .append(",WriteResultTime,").append(WriteResultTime.get())
                 .append("\n");
-        sb.append("BufferCacheTotalPage,").append(BufferCache.totalPageCount.get())
-                .append(",BufferCacheCached,").append(BufferCache.cachedPageCount.get())
-                .append(",BufferCacheRead,").append(BufferCache.readPageCount.get())
+
+        sb.append("InsideInitialAccessor,CursorOpenCount,").append(CursorOpenCount.get())
+                .append(",CursorOpenTime,").append(CursorOpenTime)
+                .append(",NumBTree,").append(NumBTrees.get())
                 .append("\n");
+
+        sb.append("FilterSearchCount,").append(FilterCheckCount.get()).append(",FilterSearchTime,")
+                .append(FilterCheckTime.get()).append("\n");
+
+        sb.append("BTreeRangeSearchCount,").append(BTreeRangeSearchCount.get()).append(",BTreeRangeSearchTime,")
+                .append(BTreeRangeSearchTime.get()).append("\n");
+        sb.append("InvertSearchCount,").append(InvertSearchCount.get()).append(",InvertSearchTime,")
+                .append(InvertSearchTime.get()).append("\n");
+        sb.append("BloomFilterCount,").append(BloomFilterCount.get()).append(",BloomFilterTime,")
+                .append(BloomFilterTime.get()).append("\n");
+        sb.append("BTreePointSearchCount,").append(BTreePointSearchCount.get()).append(",BTreePointSearchTimePathTime,")
+                .append(BTreePointSearchPathTime.get()).append(",BTreePointSearchTimeLeafTrueTime,")
+                .append(BTreePointSearchLeafTrueTime.get()).append(",BTreePointSearchTimeLeafFalseTime,")
+                .append(BTreePointSearchLeafFalseTime.get()).append(",BTreePointSearchTimeNOPETime,")
+                .append(BTreePointSearchNOPETime.get()).append("\n");
+        sb.append("BufferCacheTotalPage,").append(BufferCache.totalPageCount.get()).append(",BufferCacheCached,")
+                .append(BufferCache.cachedPageCount.get()).append(",BufferCacheRead,")
+                .append(BufferCache.readPageCount.get()).append("\n");
         LOGGER.warning(sb.toString());
     }
 
@@ -274,6 +302,16 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
         BTreePointSearchNOPETime.set(0);
 
         IndexSearchTime.set(0);
+
+        FilterCheckCount.set(0);
+        FilterCheckTime.set(0);
+        WriteResultTime.set(0);
+        ResetCurSorTime.set(0);
+        InitialAccessorTime.set(0);
+
+        CursorOpenCount.set(0);
+        CursorOpenTime.set(0);
+        NumBTrees.set(0);
 
         BufferCache.clearStats();
     }

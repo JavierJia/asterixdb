@@ -35,6 +35,7 @@ import org.apache.hyracks.api.io.IIOManager;
 import org.apache.hyracks.api.replication.IReplicationJob.ReplicationExecutionType;
 import org.apache.hyracks.api.replication.IReplicationJob.ReplicationOperation;
 import org.apache.hyracks.dataflow.common.data.accessors.ITupleReference;
+import org.apache.hyracks.storage.am.common.dataflow.IndexSearchOperatorNodePushable;
 import org.apache.hyracks.storage.am.common.impls.AbstractSearchPredicate;
 import org.apache.hyracks.storage.am.common.impls.NoOpOperationCallback;
 import org.apache.hyracks.storage.am.common.ophelpers.IndexOperation;
@@ -290,12 +291,15 @@ public abstract class AbstractLSMIndex implements ILSMIndex {
                 }
                 if (filterManager != null) {
                     for (ILSMComponent c : immutableComponents) {
+                        IndexSearchOperatorNodePushable.FilterCheckCount.getAndIncrement();
+                        long now = System.nanoTime();
                         if (c.getLSMComponentFilter().satisfy(
                                 ((AbstractSearchPredicate) ctx.getSearchPredicate()).getMinFilterTuple(),
                                 ((AbstractSearchPredicate) ctx.getSearchPredicate()).getMaxFilterTuple(),
                                 ctx.getFilterCmp())) {
                             operationalComponents.add(c);
                         }
+                        IndexSearchOperatorNodePushable.FilterCheckTime.getAndAdd(System.nanoTime() - now);
                     }
                 } else {
                     operationalComponents.addAll(immutableComponents);
