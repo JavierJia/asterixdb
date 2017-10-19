@@ -252,36 +252,37 @@ public abstract class IndexSearchOperatorNodePushable extends AbstractUnaryInput
 
     private void printStats() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\n").append(this.getClass().getSimpleName() + ",time," + (System.nanoTime() - start)).append("\n");
+        sb.append("\n").append(this.getClass().getSimpleName() + "time," + (System.nanoTime() - start)).append("\n");
         sb.append("IndexSearchTime,").append(IndexSearchTime.get()).append("\n");
 
-        sb.append("ResetTime,").append(ResetCurSorTime.get())
-                .append(",InitialAccessorTime,").append(InitialAccessorTime.get())
-                .append(",WriteResultTime,").append(WriteResultTime.get())
-                .append("\n");
+        sb.append("ResetTime,").append(ResetCurSorTime.get()).append("\n")
+                .append("InitialAccessorTime,").append(InitialAccessorTime.get()).append("\n")
+                .append("WriteResultTime,").append(WriteResultTime.get()).append("\n");
 
-        sb.append("InsideInitialAccessor,CursorOpenCount,").append(CursorOpenCount.get())
-                .append(",CursorOpenTime,").append(CursorOpenTime)
-                .append(",NumBTree,").append(NumBTrees.get())
-                .append("\n");
+        sb.append("CursorOpenCount,").append(CursorOpenCount.get()).append("\n")
+                .append("CursorOpenTime,").append(CursorOpenTime).append("\n")
+                .append("NumBTree,").append(NumBTrees.get()).append("\n");
 
-        sb.append("FilterSearchCount,").append(FilterCheckCount.get()).append(",FilterSearchTime,")
-                .append(FilterCheckTime.get()).append("\n");
+        sb.append("FilterSearchCount,").append(FilterCheckCount.get()).append("\n")
+                .append("FilterSearchTime,").append(FilterCheckTime.get()).append("\n");
 
-        sb.append("BTreeRangeSearchCount,").append(BTreeRangeSearchCount.get()).append(",BTreeRangeSearchTime,")
-                .append(BTreeRangeSearchTime.get()).append("\n");
-        sb.append("InvertSearchCount,").append(InvertSearchCount.get()).append(",InvertSearchTime,")
-                .append(InvertSearchTime.get()).append("\n");
-        sb.append("BloomFilterCount,").append(BloomFilterCount.get()).append(",BloomFilterTime,")
-                .append(BloomFilterTime.get()).append("\n");
-        sb.append("BTreePointSearchCount,").append(BTreePointSearchCount.get()).append(",BTreePointSearchTimePathTime,")
-                .append(BTreePointSearchPathTime.get()).append(",BTreePointSearchTimeLeafTrueTime,")
-                .append(BTreePointSearchLeafTrueTime.get()).append(",BTreePointSearchTimeLeafFalseTime,")
-                .append(BTreePointSearchLeafFalseTime.get()).append(",BTreePointSearchTimeNOPETime,")
-                .append(BTreePointSearchNOPETime.get()).append("\n");
-        sb.append("BufferCacheTotalPage,").append(BufferCache.totalPageCount.get()).append(",BufferCacheCached,")
-                .append(BufferCache.cachedPageCount.get()).append(",BufferCacheRead,")
-                .append(BufferCache.readPageCount.get()).append("\n");
+        sb.append("BTreeRangeSearchCount,").append(BTreeRangeSearchCount.get()).append("\n")
+                .append("BTreeRangeSearchTime,").append(BTreeRangeSearchTime.get()).append("\n");
+
+        sb.append("InvertSearchCount,").append(InvertSearchCount.get()).append("\n")
+                .append("InvertSearchTime,").append(InvertSearchTime.get()).append("\n");
+
+        sb.append("BloomFilterCount,").append(BloomFilterCount.get()).append("\n")
+                .append("BloomFilterTime,").append(BloomFilterTime.get()).append("\n");
+
+        sb.append("BTreePointSearchCount,").append(BTreePointSearchCount.get()).append("\n")
+                .append("BTreePointSearchTimePathTime,").append(BTreePointSearchPathTime.get()).append("\n")
+                .append("BTreePointSearchTimeLeafTrueTime,").append(BTreePointSearchLeafTrueTime.get()).append("\n")
+                .append("BTreePointSearchTimeLeafFalseTime,").append(BTreePointSearchLeafFalseTime.get()).append("\n")
+                .append("BTreePointSearchTimeNOPETime,").append(BTreePointSearchNOPETime.get()).append("\n");
+        sb.append("BufferCacheTotalPage,").append(BufferCache.totalPageCount.get()).append("\n")
+                .append("BufferCacheCached,").append(BufferCache.cachedPageCount.get()).append("\n")
+                .append("BufferCacheRead,").append(BufferCache.readPageCount.get()).append("\n");
         LOGGER.warning(sb.toString());
     }
 
