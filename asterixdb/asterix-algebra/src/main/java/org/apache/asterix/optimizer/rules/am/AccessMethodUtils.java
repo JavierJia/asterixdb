@@ -557,7 +557,7 @@ public class AccessMethodUtils {
             order = new OrderOperator();
             for (LogicalVariable pkVar : primaryKeyVars) {
                 Mutable<ILogicalExpression> vRef = new MutableObject<>(new VariableReferenceExpression(pkVar));
-                order.getOrderExpressions().add(new Pair<>(OrderOperator.ASC_ORDER, vRef));
+                order.getOrderExpressions().add(new Pair<>(OrderOperator.DESC_ORDER, vRef));
             }
             // The secondary-index search feeds into the sort.
             order.getInputs().add(new MutableObject<>(inputOp));
