@@ -93,13 +93,13 @@ public class LSMBTreeSearchCursor implements ITreeIndexCursor {
     }
 
     @Override
-    public ITupleReference getFilterMinTuple() {
-        return currentCursor.getFilterMinTuple();
+    public ITupleReference getFilterMinTuple(ITupleReference tMin) {
+        return currentCursor.getFilterMinTuple(tMin);
     }
 
     @Override
-    public ITupleReference getFilterMaxTuple() {
-        return currentCursor.getFilterMaxTuple();
+    public ITupleReference getFilterMaxTuple(ITupleReference tMax) {
+        return currentCursor.getFilterMaxTuple(tMax);
     }
 
     @Override

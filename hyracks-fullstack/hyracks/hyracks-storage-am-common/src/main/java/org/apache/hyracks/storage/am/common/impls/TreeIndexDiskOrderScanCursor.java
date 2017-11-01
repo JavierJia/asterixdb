@@ -60,12 +60,12 @@ public class TreeIndexDiskOrderScanCursor implements ITreeIndexCursor {
     }
 
     @Override
-    public ITupleReference getFilterMinTuple() {
+    public ITupleReference getFilterMinTuple(ITupleReference qMin) {
         return null;
     }
 
     @Override
-    public ITupleReference getFilterMaxTuple() {
+    public ITupleReference getFilterMaxTuple(ITupleReference qMax) {
         return null;
     }
 

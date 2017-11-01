@@ -71,11 +71,11 @@ public interface IIndexCursor {
     /**
      * @return the min tuple of the current index's filter
      */
-    ITupleReference getFilterMinTuple();
+    ITupleReference getFilterMinTuple(ITupleReference queryMin);
 
     /**
      *
      * @return the max tuple of the current index's filter
      */
-    ITupleReference getFilterMaxTuple();
+    ITupleReference getFilterMaxTuple(ITupleReference queryMax);
 }

@@ -103,12 +103,12 @@ public class BTreeRangeSearchCursor implements ITreeIndexCursor {
     }
 
     @Override
-    public ITupleReference getFilterMinTuple() {
+    public ITupleReference getFilterMinTuple(ITupleReference t) {
         return null;
     }
 
     @Override
-    public ITupleReference getFilterMaxTuple() {
+    public ITupleReference getFilterMaxTuple(ITupleReference t) {
         return null;
     }
 

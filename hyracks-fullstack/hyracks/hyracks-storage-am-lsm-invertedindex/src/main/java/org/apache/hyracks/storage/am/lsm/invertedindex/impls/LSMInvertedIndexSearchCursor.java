@@ -201,14 +201,32 @@ public class LSMInvertedIndexSearchCursor implements IIndexCursor {
     }
 
     @Override
-    public ITupleReference getFilterMinTuple() {
+    public ITupleReference getFilterMinTuple(ITupleReference tMin) {
         ILSMComponentFilter filter = getComponentFilter();
+        if (filter != null && tMin != null) {
+            int cmp = 0;
+            try {
+                cmp = opCtx.getFilterCmp().compare(filter.getMinTuple(), tMin);
+            } catch (HyracksDataException e) {
+                e.printStackTrace();
+            }
+            return cmp < 0 ? tMin  : filter.getMinTuple();
+        }
         return filter == null ? null : filter.getMinTuple();
     }
 
     @Override
-    public ITupleReference getFilterMaxTuple() {
+    public ITupleReference getFilterMaxTuple(ITupleReference tMax) {
         ILSMComponentFilter filter = getComponentFilter();
+        if (filter != null && tMax != null ){
+            int cmp = 0;
+            try {
+                cmp = opCtx.getFilterCmp().compare(filter.getMaxTuple(), tMax);
+            } catch (HyracksDataException e) {
+                e.printStackTrace();
+            }
+            return cmp > 0 ? tMax : filter.getMaxTuple();
+        }
         return filter == null ? null : filter.getMaxTuple();
     }
 

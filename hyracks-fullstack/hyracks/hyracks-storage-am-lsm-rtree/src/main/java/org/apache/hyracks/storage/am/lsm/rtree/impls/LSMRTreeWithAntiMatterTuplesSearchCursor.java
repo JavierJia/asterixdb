@@ -203,18 +203,34 @@ public class LSMRTreeWithAntiMatterTuplesSearchCursor extends LSMIndexSearchCurs
     }
 
     @Override
-    public ITupleReference getFilterMinTuple() {
+    public ITupleReference getFilterMinTuple(ITupleReference tMin) {
         ILSMComponentFilter filter = operationalComponents.get(
                 currentCursor < numMutableComponents ? currentCursor : outputElement.getCursorIndex() + currentCursor)
                 .getLSMComponentFilter();
+        if (filter != null && tMin != null) {
+            try {
+                int cmp = opCtx.getFilterCmp().compare(filter.getMinTuple(), tMin);
+                return cmp < 0 ? tMin : filter.getMinTuple();
+            } catch (HyracksDataException e) {
+                e.printStackTrace();
+            }
+        }
         return filter == null ? null : filter.getMinTuple();
     }
 
     @Override
-    public ITupleReference getFilterMaxTuple() {
+    public ITupleReference getFilterMaxTuple(ITupleReference tMax) {
         ILSMComponentFilter filter = operationalComponents.get(
                 currentCursor < numMutableComponents ? currentCursor : outputElement.getCursorIndex() + currentCursor)
                 .getLSMComponentFilter();
+        if (filter != null && tMax != null) {
+            try {
+                int cmp = opCtx.getFilterCmp().compare(filter.getMaxTuple(), tMax);
+                return cmp > 0 ? tMax : filter.getMaxTuple();
+            } catch (HyracksDataException e) {
+                e.printStackTrace();
+            }
+        }
         return filter == null ? null : filter.getMaxTuple();
     }
 

@@ -71,13 +71,13 @@ public class LSMBTreeWithBuddySortedCursor extends LSMBTreeWithBuddyAbstractCurs
     }
 
     @Override
-    public ITupleReference getFilterMinTuple() {
+    public ITupleReference getFilterMinTuple(ITupleReference t) {
         ILSMComponentFilter filter = getFilter();
         return filter == null ? null : filter.getMinTuple();
     }
 
     @Override
-    public ITupleReference getFilterMaxTuple() {
+    public ITupleReference getFilterMaxTuple(ITupleReference t) {
         ILSMComponentFilter filter = getFilter();
         return filter == null ? null : filter.getMaxTuple();
     }

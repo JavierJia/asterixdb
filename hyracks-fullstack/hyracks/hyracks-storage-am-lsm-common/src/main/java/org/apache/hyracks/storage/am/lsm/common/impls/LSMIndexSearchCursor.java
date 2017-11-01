@@ -168,14 +168,30 @@ public abstract class LSMIndexSearchCursor implements ITreeIndexCursor {
     }
 
     @Override
-    public ITupleReference getFilterMinTuple() {
+    public ITupleReference getFilterMinTuple(ITupleReference queryMin) {
         ILSMComponentFilter filter = operationalComponents.get(outputElement.cursorIndex).getLSMComponentFilter();
-        return filter == null ? null : filter.getMinTuple();
+        if (filter != null && queryMin != null) {
+            try {
+                int c = opCtx.getFilterCmp().compare(filter.getMinTuple(), queryMin);
+                return c < 0 ? queryMin : filter.getMinTuple();
+            } catch (HyracksDataException e) {
+                e.printStackTrace();
+            }
+        }
+        return filter == null ? null: filter.getMinTuple();
     }
 
     @Override
-    public ITupleReference getFilterMaxTuple() {
+    public ITupleReference getFilterMaxTuple(ITupleReference queryMax) {
         ILSMComponentFilter filter = operationalComponents.get(outputElement.cursorIndex).getLSMComponentFilter();
+        if (filter != null && queryMax != null) {
+            try {
+                int c = opCtx.getFilterCmp().compare(filter.getMaxTuple(), queryMax);
+                return c > 0 ? queryMax : filter.getMaxTuple();
+            } catch (HyracksDataException e) {
+                e.printStackTrace();
+            }
+        }
         return filter == null ? null : filter.getMaxTuple();
     }
 
